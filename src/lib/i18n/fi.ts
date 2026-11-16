@@ -34,5 +34,8 @@ export const fi: Record<keyof typeof en, string> = {
   confirmRemove: 'Poistetaanko tämä tili sovelluksesta?',
   emptyHint: 'Uudet kohteet näkyvät tässä',
   media: 'Liitteet',
+  unreadItem: 'Lukematon',
+  readItem: 'Luettu',
+  version: 'Versio',
   errorLoginFailed: 'Kirjautuminen epäonnistui. Yritä uudelleen.',
 };

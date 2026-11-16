@@ -101,6 +101,7 @@
         <button type="button" class="primary" onclick={() => (adding = true)}><Plus size={16} aria-hidden="true" /> {t('addAccount')}</button>
       {/if}
       {#if errorText}<p class="error" role="alert">{errorText}</p>{/if}
+      <p class="version">{t('appName')} · {t('version')} {__APP_VERSION__}</p>
     </section>
   {/if}
 </div>
@@ -246,6 +247,13 @@
   .failed {
     display: inline-flex;
     color: var(--ctp-red);
+  }
+  .version {
+    margin: 0.75rem 0 0;
+    padding-top: 0.5rem;
+    border-top: 1px solid var(--ctp-surface0);
+    font-size: 0.75rem;
+    color: var(--ctp-overlay1);
   }
   .error {
     margin: 0.5rem 0 0;

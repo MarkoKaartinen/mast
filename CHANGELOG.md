@@ -18,3 +18,5 @@
 * Move the accounts behind an icon in the top right corner and give each account its own color
 * Show on every card which account it concerns, the time as relative text and image attachments
 * Show the account at the top of each card and dim the colored edge of read cards
+* Show the read state of a card with an icon and the edge color instead of a different background
+* Show the app version in the accounts menu

@@ -55,6 +55,10 @@ To update:
     npm ci
     npm run build
 
+### Caching
+
+The files in `assets/` have a content hash in their name, so a new build always gets new names and they can be cached for a long time (`Cache-Control: public, max-age=31536000, immutable`). The files without a hash must not be cached without checking: `index.html`, `sw.js`, `registerSW.js` and `manifest.webmanifest` should have `Cache-Control: no-cache`. The service worker updates itself and the page reloads when a new version is available.
+
 ## License
 
 To be decided.

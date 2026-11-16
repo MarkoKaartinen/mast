@@ -1,8 +1,13 @@
+import { readFileSync } from 'node:fs';
 import { defineConfig } from 'vitest/config';
 import { svelte } from '@sveltejs/vite-plugin-svelte';
 import { VitePWA } from 'vite-plugin-pwa';
 
+const { version } = JSON.parse(readFileSync(new URL('./package.json', import.meta.url), 'utf-8'));
+
 export default defineConfig({
+  // The version shown in the app comes from package.json
+  define: { __APP_VERSION__: JSON.stringify(version) },
   // Static assets (icons) live in static/, the build goes to public/ for the web server
   publicDir: 'static',
   resolve: { alias: { $lib: new URL('./src/lib', import.meta.url).pathname } },

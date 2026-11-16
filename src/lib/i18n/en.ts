@@ -32,5 +32,8 @@ export const en = {
   confirmRemove: 'Remove this account from the app?',
   emptyHint: 'New items show up here',
   media: 'Attachments',
+  unreadItem: 'Unread',
+  readItem: 'Read',
+  version: 'Version',
   errorLoginFailed: 'Login failed. Try again.',
 } as const;
