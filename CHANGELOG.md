@@ -1,3 +1,7 @@
+### Unreleased
+
+* Show a welcome page with the server field when no account is connected
+
 ### 0.1.0: 2026-11-16
 
 * First release of Mastodon Tools (MAST): a PWA for following several Mastodon accounts, in Finnish and English with the Catppuccin Mocha theme

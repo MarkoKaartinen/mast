@@ -7,7 +7,6 @@ export const fi: Record<keyof typeof en, string> = {
   columnMessages: 'Yksityisviestit',
   columnPosts: 'Lähetetyt julkaisut',
   empty: 'Ei vielä mitään',
-  noAccounts: 'Yhtään tiliä ei ole vielä liitetty',
   accounts: 'Tilit',
   addAccount: 'Lisää tili',
   serverLabel: 'Palvelin',
@@ -38,4 +37,6 @@ export const fi: Record<keyof typeof en, string> = {
   readItem: 'Luettu',
   version: 'Versio',
   errorLoginFailed: 'Kirjautuminen epäonnistui. Yritä uudelleen.',
+  welcomeLead: 'Yksi näkymä kaikkien Mastodon-tiliesi ilmoituksiin, millä tahansa palvelimella.',
+  welcomePrivacy: 'Ei erillistä käyttäjätiliä: kirjaudut omalle palvelimellesi ja kaikki pysyy tässä selaimessa.',
 };

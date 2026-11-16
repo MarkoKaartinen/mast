@@ -216,3 +216,14 @@ test('removing an account also removes its saved items and read marks', async ({
   await page.reload();
   await expect(page.getByText('Liked post')).toHaveCount(0);
 });
+
+test('shows a welcome page without accounts and the columns once one is connected', async ({ page }) => {
+  await page.goto('/');
+  await expect(page.getByRole('heading', { name: 'Mastodon Tools', level: 2 })).toBeVisible();
+  await expect(page.getByRole('button', { name: /^accounts$|^tilit$/i })).toHaveCount(0);
+  await page.screenshot({ path: 'test-results/welcome.png' });
+  await page.getByLabel(/server|palvelin/i).fill('mastodon.example');
+  await page.getByRole('button', { name: /connect|yhdistä/i }).click();
+  await expect(page.getByText(defaultProfile.favourite.split(' :')[0])).toBeVisible();
+  await expect(page.getByRole('heading', { name: 'Mastodon Tools', level: 2 })).toHaveCount(0);
+});

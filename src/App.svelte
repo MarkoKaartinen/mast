@@ -5,6 +5,7 @@
   import Accounts from '$lib/components/Accounts.svelte';
   import Column from '$lib/components/Column.svelte';
   import Logo from '$lib/components/Logo.svelte';
+  import Welcome from '$lib/components/Welcome.svelte';
   import { COLUMN_ICONS } from '$lib/columnIcons';
   import { COLUMN_TITLES, COLUMNS, feedStore, refreshAll, restoreFeeds, startPolling, totalUnread, unreadCount } from '$lib/feeds.svelte';
   import { t } from '$lib/i18n';
@@ -38,33 +39,42 @@
 
 <header class="bar">
   <h1><Logo size={32} /> {t('appName')}</h1>
-  <div class="actions">
-    <button type="button" class="refresh touch-target" class:spinning={feedStore.loading} disabled={feedStore.loading} title={t('refresh')} aria-label={t('refresh')} onclick={() => void refreshAll()}>
-      <RefreshCw size={18} aria-hidden="true" />
-    </button>
-    <Accounts />
-  </div>
+  {#if accountStore.list.length > 0}
+    <div class="actions">
+      <button type="button" class="refresh touch-target" class:spinning={feedStore.loading} disabled={feedStore.loading} title={t('refresh')} aria-label={t('refresh')} onclick={() => void refreshAll()}>
+        <RefreshCw size={18} aria-hidden="true" />
+      </button>
+      <Accounts />
+    </div>
+  {/if}
 </header>
 
-<main class="columns">
-  {#each COLUMNS as id (id)}
-    <Column column={id} title={COLUMN_TITLES[id]} hasAccounts={accountStore.list.length > 0} active={id === active} />
-  {/each}
-</main>
+{#if !accountStore.ready}
+  <!-- Wait for the stored accounts, so the welcome page does not flash for existing users -->
+  <div class="columns"></div>
+{:else if accountStore.list.length === 0}
+  <Welcome />
+{:else}
+  <main class="columns">
+    {#each COLUMNS as id (id)}
+      <Column column={id} title={COLUMN_TITLES[id]} active={id === active} />
+    {/each}
+  </main>
 
-<nav class="tabs" aria-label={t('appName')}>
-  {#each COLUMNS as id (id)}
-    {@const Icon = COLUMN_ICONS[id]}
-    {@const unread = unreadCount(id)}
-    <button type="button" class:active={id === active} aria-current={id === active} onclick={() => (active = id)}>
-      <span class="icon">
-        <Icon size={20} aria-hidden="true" />
-        {#if unread > 0}<span class="dot" aria-label={`${unread} ${t('unread')}`}></span>{/if}
-      </span>
-      <span class="label">{t(COLUMN_TITLES[id])}</span>
-    </button>
-  {/each}
-</nav>
+  <nav class="tabs" aria-label={t('appName')}>
+    {#each COLUMNS as id (id)}
+      {@const Icon = COLUMN_ICONS[id]}
+      {@const unread = unreadCount(id)}
+      <button type="button" class:active={id === active} aria-current={id === active} onclick={() => (active = id)}>
+        <span class="icon">
+          <Icon size={20} aria-hidden="true" />
+          {#if unread > 0}<span class="dot" aria-label={`${unread} ${t('unread')}`}></span>{/if}
+        </span>
+        <span class="label">{t(COLUMN_TITLES[id])}</span>
+      </button>
+    {/each}
+  </nav>
+{/if}
 
 <style>
   :global(#app) {
