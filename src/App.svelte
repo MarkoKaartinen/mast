@@ -1,5 +1,5 @@
 <script lang="ts">
-  import { onMount } from 'svelte';
+  import { onMount, untrack } from 'svelte';
   import { accountStore, initAccounts } from '$lib/accounts.svelte';
   import Accounts from '$lib/components/Accounts.svelte';
   import Column from '$lib/components/Column.svelte';
@@ -21,15 +21,17 @@
     return startPolling();
   });
 
-  // Fetch whenever the set of accounts changes, including after the first load
+  // Fetch whenever the set of accounts changes, including after the first load.
+  // untrack: the refresh reads and writes its own loading state, which must not re-run this effect.
   $effect(() => {
     void accountStore.list.length;
-    if (accountStore.ready) void refreshAll();
+    if (accountStore.ready) untrack(() => void refreshAll());
   });
 
   // One live stream per account: it only tells when to refresh, the columns are always loaded from the REST API
   $effect(() => {
-    const stops = accountStore.list.map((account) => connectStream(account, () => void refreshAll()));
+    const accounts = accountStore.list;
+    const stops = untrack(() => accounts.map((account) => connectStream(account, () => void refreshAll())));
     return () => stops.forEach((stop) => stop());
   });
 </script>

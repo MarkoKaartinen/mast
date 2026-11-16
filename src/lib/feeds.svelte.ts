@@ -22,6 +22,8 @@ export const feedStore = $state({
   seen: {} as Record<string, string | undefined>,
   /** Account keys whose last refresh failed */
   failed: [] as string[],
+  /** False until the first refresh has finished, so "loading" is only shown once */
+  loaded: false,
   loading: false,
 });
 
@@ -84,6 +86,7 @@ export async function refreshAll(): Promise<void> {
   for (const column of COLUMNS) feedStore.items[column] = next[column];
   feedStore.failed = [...failed];
   feedStore.loading = false;
+  feedStore.loaded = true;
   if (refreshAgain) {
     refreshAgain = false;
     await refreshAll();

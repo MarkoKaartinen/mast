@@ -102,3 +102,22 @@ test('refreshes when the stream reports a notification', async ({ page }) => {
 
   await expect(page.getByText('Brand new favourite')).toBeVisible();
 });
+
+test('shows an empty column as empty and loads each feed only once', async ({ page }) => {
+  await page.setViewportSize({ width: 1280, height: 800 });
+  let conversationRequests = 0;
+  await page.route('https://mastodon.example/api/v1/conversations**', (route) => {
+    conversationRequests++;
+    return route.fulfill({ json: [] });
+  });
+  await connect(page);
+
+  await expect(page.getByText('Liked post')).toBeVisible();
+  const messages = page.locator('section.column').nth(2);
+  await expect(messages.getByText(/nothing here yet|ei vielä mitään/i)).toBeVisible();
+  await expect(messages.getByText(/loading|ladataan/i)).toHaveCount(0);
+
+  // A refresh loop would keep requesting while nothing changes
+  await page.waitForTimeout(1500);
+  expect(conversationRequests).toBe(1);
+});

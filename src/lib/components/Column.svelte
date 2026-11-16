@@ -22,7 +22,7 @@
 {#if !hasAccounts}
   <p class="empty">{t('noAccounts')}</p>
 {:else if items.length === 0}
-  <p class="empty">{feedStore.loading ? t('loading') : t('empty')}</p>
+  <p class="empty">{feedStore.loaded ? t('empty') : t('loading')}</p>
 {:else}
   {#each items as item (item.key)}
     <FeedCard {item} unread={isItemUnread(column, item)} />
