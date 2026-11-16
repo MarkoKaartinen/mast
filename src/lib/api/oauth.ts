@@ -10,6 +10,8 @@ export interface AppRegistration {
   clientId: string;
   clientSecret: string;
   redirectUri: string;
+  /** Scopes the app was registered with, to detect that it must be registered again */
+  scopes: string;
 }
 
 export interface TokenResponse {
@@ -66,7 +68,7 @@ export async function registerApp(instance: string): Promise<AppRegistration> {
   if (typeof data.client_id !== 'string' || typeof data.client_secret !== 'string') {
     throw new Error('Unexpected app registration response');
   }
-  return { instance, clientId: data.client_id, clientSecret: data.client_secret, redirectUri: redirectUri() };
+  return { instance, clientId: data.client_id, clientSecret: data.client_secret, redirectUri: redirectUri(), scopes: SCOPES };
 }
 
 /** Stores the PKCE verifier and state, then returns the authorization URL to send the user to. */
