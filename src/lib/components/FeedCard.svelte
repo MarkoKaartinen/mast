@@ -1,5 +1,5 @@
 <script lang="ts">
-  import { Repeat2 } from '@lucide/svelte';
+  import { CircleDot, CheckCheck, Repeat2 } from '@lucide/svelte';
   import { accountColorClass } from '$lib/accountColor';
   import { accountStore } from '$lib/accounts.svelte';
   import { COLUMN_ICONS } from '$lib/columnIcons';
@@ -68,7 +68,12 @@
       <strong>{item.from.displayName}</strong>
       <small>{item.from.acct}</small>
     </div>
-    {#if unread}<span class="unread-dot" title={t('unread')}></span>{/if}
+    <!-- The state is shown by the edge color and this icon, the card itself looks the same -->
+    {#if unread}
+      <span class="state unread-icon" title={t('unreadItem')}><CircleDot size={16} aria-label={t('unreadItem')} /></span>
+    {:else}
+      <span class="state" title={t('readItem')}><CheckCheck size={16} aria-label={t('readItem')} /></span>
+    {/if}
   </header>
 
   <p class="action {item.kind}"><Icon size={14} aria-hidden="true" /> {t(labels[item.kind])}</p>
@@ -98,13 +103,10 @@
     border-left: 3px solid color-mix(in srgb, var(--account) 45%, transparent);
     border-radius: 0.5rem;
     overflow-wrap: anywhere;
-    color: var(--ctp-subtext1);
+    color: var(--ctp-text);
   }
   .card.unread {
-    background: var(--ctp-surface0);
-    border-color: var(--ctp-surface1);
     border-left-color: var(--account);
-    color: var(--ctp-text);
   }
   header {
     display: flex;
@@ -126,11 +128,12 @@
     color: var(--ctp-subtext0);
     font-size: 0.8rem;
   }
-  .unread-dot {
-    width: 0.55rem;
-    height: 0.55rem;
-    background: var(--ctp-mauve);
-    border-radius: 50%;
+  .state {
+    display: inline-flex;
+    color: var(--ctp-surface2);
+  }
+  .state.unread-icon {
+    color: var(--account);
   }
   .action {
     display: flex;
