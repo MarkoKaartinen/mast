@@ -4,6 +4,7 @@
   import { accountStore, initAccounts } from '$lib/accounts.svelte';
   import Accounts from '$lib/components/Accounts.svelte';
   import Column from '$lib/components/Column.svelte';
+  import Logo from '$lib/components/Logo.svelte';
   import { COLUMN_ICONS } from '$lib/columnIcons';
   import { COLUMN_TITLES, COLUMNS, feedStore, refreshAll, startPolling, unreadCount } from '$lib/feeds.svelte';
   import { t } from '$lib/i18n';
@@ -25,7 +26,7 @@
 </script>
 
 <header class="bar">
-  <h1>{t('appName')}</h1>
+  <h1><Logo size={32} /> {t('appName')}</h1>
   <div class="actions">
     <button type="button" class="refresh" class:spinning={feedStore.loading} disabled={feedStore.loading} title={t('refresh')} aria-label={t('refresh')} onclick={() => void refreshAll()}>
       <RefreshCw size={18} aria-hidden="true" />
@@ -68,6 +69,9 @@
     border-bottom: 1px solid var(--ctp-surface0);
   }
   h1 {
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
     margin: 0;
     font-size: 1.05rem;
     color: var(--ctp-mauve);
