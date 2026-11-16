@@ -61,4 +61,4 @@ The files in `assets/` have a content hash in their name, so a new build always 
 
 ## License
 
-To be decided.
+MIT, see [LICENSE](LICENSE).

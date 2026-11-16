@@ -21,3 +21,4 @@
 * Show the read state of a card with an icon and the edge color instead of a different background
 * Show the app version in the accounts menu
 * Add the bell logo as the app icon, favicon and app bar logo
+* Add the MIT license
