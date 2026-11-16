@@ -1,3 +1,4 @@
+import { compareIds } from '$lib/unread';
 import type { Conversation, Notification, Status } from '$lib/api/types';
 
 /** One row in a column, the same shape for every column. */
@@ -66,4 +67,23 @@ export function fromPosts(accountKey: string, list: Status[]): FeedItem[] {
 /** Merges the items of all accounts, newest first. Dates are used because ids differ between servers. */
 export function mergeFeeds(feeds: FeedItem[][]): FeedItem[] {
   return feeds.flat().sort((a, b) => Date.parse(b.createdAt) - Date.parse(a.createdAt));
+}
+
+/** The items of one account in one column, and the link to load older ones (null when there are none). */
+export interface Slot {
+  items: FeedItem[];
+  next: string | null;
+}
+
+/**
+ * Combines a fresh first page with what is already shown. Older items loaded with "load more" stay,
+ * so a refresh does not throw them away; items that are in the fresh page are replaced by it.
+ */
+export function mergeRefresh(existing: Slot | undefined, fresh: Slot): Slot {
+  if (!existing || fresh.items.length === 0) return fresh;
+  const oldestFresh = fresh.items.reduce((min, i) => (compareIds(i.id, min) < 0 ? i.id : min), fresh.items[0].id);
+  const freshKeys = new Set(fresh.items.map((i) => i.key));
+  const older = existing.items.filter((i) => !freshKeys.has(i.key) && compareIds(i.id, oldestFresh) < 0);
+  // With older items kept, the old link still points past them
+  return { items: [...fresh.items, ...older], next: older.length ? existing.next : fresh.next };
 }

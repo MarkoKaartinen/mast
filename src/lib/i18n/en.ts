@@ -26,5 +26,7 @@ export const en = {
   loadFailed: 'Could not load this account',
   refresh: 'Refresh',
   rateLimitedHint: 'Too many requests, waiting before trying again',
+  loadMore: 'Load more',
+  loginExpiredHint: 'The server no longer accepts this login',
   errorLoginFailed: 'Login failed. Try again.',
 } as const;

@@ -1,6 +1,6 @@
 <script lang="ts">
   import { CheckCheck } from '@lucide/svelte';
-  import { columnItems, feedStore, isItemUnread, markRead, unreadCount } from '$lib/feeds.svelte';
+  import { columnItems, feedStore, hasMore, isItemUnread, loadMore, markRead, unreadCount } from '$lib/feeds.svelte';
   import { t, type Key } from '$lib/i18n';
   import type { ColumnId } from '$lib/unread';
   import FeedCard from './FeedCard.svelte';
@@ -27,6 +27,11 @@
   {#each items as item (item.key)}
     <FeedCard {item} unread={isItemUnread(column, item)} />
   {/each}
+  {#if hasMore(column)}
+    <button type="button" class="more" disabled={feedStore.loadingMore[column]} onclick={() => loadMore(column)}>
+      {feedStore.loadingMore[column] ? t('loading') : t('loadMore')}
+    </button>
+  {/if}
 {/if}
 
 <style>
@@ -63,6 +68,13 @@
   button:disabled {
     opacity: 0.5;
     cursor: default;
+  }
+  .more {
+    display: block;
+    width: 100%;
+    justify-content: center;
+    padding: 0.5rem;
+    margin-bottom: 1rem;
   }
   .empty {
     color: var(--ctp-overlay1);

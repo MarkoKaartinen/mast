@@ -12,3 +12,5 @@
 * Show the server form only when adding an account and mark accounts that fail to load
 * Fix empty columns staying in the loading state and feeds being reloaded in a loop
 * Show which columns failed and with what status when hovering the warning of an account
+* Add a load more button to each column for older items
+* Ask to log in again when the server no longer accepts a token

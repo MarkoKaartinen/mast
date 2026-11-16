@@ -8,6 +8,8 @@
   let server = $state('');
   let busy = $state(false);
   let adding = $state(false);
+  // 401 means the server no longer accepts the token (revoked or expired)
+  const expired = (key: string) => feedStore.failed[key]?.some((f) => f.status === '401') ?? false;
   // With no accounts the form is the only thing to do, so it is always shown
   const showForm = $derived(adding || accountStore.list.length === 0);
 
@@ -42,8 +44,8 @@
           {@const detail = feedStore.failed[account.key].map((f) => `${t(COLUMN_TITLES[f.column])}: ${f.status}`).join(', ')}
           <span class="failed" title={`${t('loadFailed')} (${detail})${feedStore.failed[account.key].some((f) => f.status === '429') ? '. ' + t('rateLimitedHint') : ''}`}><CircleAlert size={16} aria-label={t('loadFailed')} /></span>
         {/if}
-        {#if needsRelogin(account)}
-          <button type="button" class="warn" title={t('loginAgainHint')} onclick={() => addAccount(account.instance)}>
+        {#if needsRelogin(account) || expired(account.key)}
+          <button type="button" class="warn" title={needsRelogin(account) ? t('loginAgainHint') : t('loginExpiredHint')} onclick={() => addAccount(account.instance)}>
             {t('loginAgain')}
           </button>
         {/if}

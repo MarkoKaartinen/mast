@@ -45,10 +45,19 @@ export async function mockMastodon(page: Page): Promise<void> {
         return json({});
       case '/api/v1/accounts/verify_credentials':
         return json(me);
-      case '/api/v1/notifications':
-        return url.searchParams.getAll('types[]').includes('mention')
-          ? json([notification('20', 'mention', '<p>Hello <a href="javascript:alert(1)">@ronsu</a></p>')])
-          : json([notification('12', 'favourite', '<p>Liked post</p>'), notification('11', 'reblog', '<p>Boosted post</p>')]);
+      case '/api/v1/notifications': {
+        if (url.searchParams.getAll('types[]').includes('mention')) {
+          return json([notification('20', 'mention', '<p>Hello <a href="javascript:alert(1)">@ronsu</a></p>')]);
+        }
+        // Favourites and boosts have a second, older page
+        if (url.searchParams.get('max_id')) return json([notification('5', 'favourite', '<p>Older favourite</p>')]);
+        const next = `<${INSTANCE}/api/v1/notifications?limit=40&types[]=favourite&types[]=reblog&max_id=11>; rel="next"`;
+        return route.fulfill({
+          // Like Mastodon, expose the Link header to the browser
+          headers: { link: next, 'access-control-expose-headers': 'Link' },
+          json: [notification('12', 'favourite', '<p>Liked post</p>'), notification('11', 'reblog', '<p>Boosted post</p>')],
+        });
+      }
       case '/api/v1/conversations':
         return json([{ id: '5', unread: true, accounts: [other], last_status: status('30', '<p>Secret hello</p>', other) }]);
       case `/api/v1/accounts/${me.id}/statuses`:

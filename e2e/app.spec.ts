@@ -118,3 +118,27 @@ test('refreshes with the button and keeps old items when the server rate limits'
   await page.waitForTimeout(500);
   expect(requests).toBe(before);
 });
+
+test('loads older items with the load more button', async ({ page }) => {
+  await page.setViewportSize({ width: 1280, height: 800 });
+  await connect(page);
+  await expect(page.getByText('Liked post')).toBeVisible();
+  await expect(page.getByText('Older favourite')).toHaveCount(0);
+
+  const interactions = page.locator('section.column').first();
+  await interactions.getByRole('button', { name: /load more|lataa lisää/i }).click();
+  await expect(page.getByText('Older favourite')).toBeVisible();
+  // There was only one older page, and the newer items are still there
+  await expect(interactions.getByRole('button', { name: /load more|lataa lisää/i })).toHaveCount(0);
+  await expect(page.getByText('Liked post')).toBeVisible();
+  // Other columns had no older page
+  await expect(page.locator('section.column').nth(1).getByRole('button', { name: /load more|lataa lisää/i })).toHaveCount(0);
+});
+
+test('asks to log in again when the token is no longer accepted', async ({ page }) => {
+  await page.setViewportSize({ width: 1280, height: 800 });
+  await page.route('https://mastodon.example/api/v1/notifications**', (route) => route.fulfill({ status: 401, json: { error: 'The access token is invalid' } }));
+  await connect(page);
+
+  await expect(page.getByRole('button', { name: /log in again|kirjaudu uudelleen/i })).toBeVisible();
+});
