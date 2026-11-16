@@ -12,6 +12,8 @@ export interface Profile {
   mention: string;
   message: string;
   post: string;
+  /** The newest item of each column, which appears when the server is released */
+  news: { favourite: string; mention: string; message: string; post: string };
   /** Item ages, so that the accounts' items mix in the columns and times look recent */
   minutesAgo: { favourite: number; boost: number; mention: number; message: number; post: number };
   /** Gives the favourites a second, older page and the own post an image. Used by the tests, not the screenshots. */
@@ -28,6 +30,7 @@ export const defaultProfile: Profile = {
   mention: 'Hello <a href="javascript:alert(1)">@ronsu</a>',
   message: 'Secret hello',
   post: 'My own post',
+  news: { favourite: 'Great thread today', mention: 'Can you check this out @ronsu', message: 'Did you see the news?', post: 'Back at the desk after lunch' },
   minutesAgo: { favourite: 12, boost: 95, mention: 30, message: 50, post: 200 },
   extras: true,
 };
@@ -42,6 +45,7 @@ export const secondProfile: Profile = {
   mention: 'Thanks for the tip, it worked :blobaww:',
   message: 'Are we still meeting on Friday?',
   post: 'Coffee first, then the garden',
+  news: { favourite: 'First tomatoes of the year', mention: 'Which book was it again?', message: 'Running a bit late', post: 'Evening walk by the lake' },
   minutesAgo: { favourite: 45, boost: 20, mention: 8, message: 130, post: 70 },
   extras: false,
 };
@@ -125,10 +129,10 @@ export async function mockMastodon(page: Page, profile: Profile = defaultProfile
         return json(me);
       case '/api/v1/notifications': {
         if (url.searchParams.getAll('types[]').includes('mention')) {
-          return json([...fresh([notification('21', 'mention', 'Fresh mention', 1)]), notification('20', 'mention', profile.mention, age.mention)]);
+          return json([...fresh([notification('21', 'mention', profile.news.mention, 1)]), notification('20', 'mention', profile.mention, age.mention)]);
         }
         const items = [
-          ...fresh([notification('13', 'favourite', 'Fresh favourite', 1)]),
+          ...fresh([notification('13', 'favourite', profile.news.favourite, 1)]),
           notification('12', 'favourite', profile.favourite, age.favourite),
           notification('11', 'reblog', profile.boost, age.boost),
         ];
@@ -145,12 +149,12 @@ export async function mockMastodon(page: Page, profile: Profile = defaultProfile
             id: '5',
             unread: true,
             accounts: [other],
-            last_status: released ? status('31', 'Fresh message', 1, other) : status('30', profile.message, age.message, other),
+            last_status: released ? status('31', profile.news.message, 1, other) : status('30', profile.message, age.message, other),
           },
         ]);
       case `/api/v1/accounts/${me.id}/statuses`: {
         const own = status('40', profile.post, age.post);
-        const newest = fresh([status('41', 'Fresh post', 1)]);
+        const newest = fresh([status('41', profile.news.post, 1)]);
         if (!profile.extras) return json([...newest, own]);
         const image = { id: 'm1', type: 'image', url: `${instance}/preview.svg`, preview_url: `${instance}/preview.svg`, description: 'A purple square' };
         return json([...newest, { ...own, media_attachments: [image] }]);

@@ -21,7 +21,7 @@ async function connectBoth(page: Page) {
   // Something new happens after the accounts were added, so there is something unread to show
   for (const server of servers) server.release();
   await page.getByRole('button', { name: /^refresh$/i }).click();
-  await expect(page.getByText('Fresh favourite').first()).toBeVisible();
+  await expect(page.getByText(defaultProfile.news.favourite)).toBeVisible();
 }
 
 test('desktop screenshot', async ({ page }) => {

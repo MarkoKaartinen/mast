@@ -1,5 +1,5 @@
 import { expect, test } from '@playwright/test';
-import { mockMastodon, type MockServer } from './mock';
+import { defaultProfile, mockMastodon, type MockServer } from './mock';
 
 let server: MockServer;
 
@@ -15,7 +15,7 @@ async function openAccounts(page: import('@playwright/test').Page) {
 async function refreshWithNews(page: import('@playwright/test').Page) {
   server.release();
   await page.getByRole('button', { name: /^refresh$|^päivitä$/i }).click();
-  await expect(page.getByText('Fresh favourite')).toBeVisible();
+  await expect(page.getByText(defaultProfile.news.favourite)).toBeVisible();
 }
 
 async function connect(page: import('@playwright/test').Page) {
