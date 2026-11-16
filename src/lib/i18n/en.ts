@@ -15,5 +15,13 @@ export const en = {
   loginAgain: 'Log in again',
   loginAgainHint: 'The app needs new permissions',
   errorInvalidInstance: 'Enter a server address like mastodon.example',
+  kindFavourite: 'Favourited your post',
+  kindReblog: 'Boosted your post',
+  kindMention: 'Mentioned you',
+  kindMessage: 'Direct message',
+  kindPost: 'Your post',
+  markRead: 'Mark as read',
+  unread: 'unread',
+  loading: 'Loading',
   errorLoginFailed: 'Login failed. Try again.',
 } as const;

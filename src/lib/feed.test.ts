@@ -22,18 +22,18 @@ const note = (id: string, type: string, created_at: string): Notification => ({
 });
 
 describe('feed', () => {
-  it('keeps only the notification types of the columns and marks unread ones', () => {
-    const items = fromNotifications('acc', [note('12', 'favourite', 'a'), note('11', 'follow', 'a'), note('9', 'reblog', 'a')], () => '10');
-    expect(items.map((i) => [i.id, i.kind, i.unread])).toEqual([
-      ['12', 'favourite', true],
-      ['9', 'reblog', false],
+  it('keeps only the notification types of the columns', () => {
+    const items = fromNotifications('acc', [note('12', 'favourite', 'a'), note('11', 'follow', 'a'), note('9', 'reblog', 'a')]);
+    expect(items.map((i) => [i.id, i.kind])).toEqual([
+      ['12', 'favourite'],
+      ['9', 'reblog'],
     ]);
     expect(items[0].from.displayName).toBe('ronsu@mastodon.example');
   });
 
   it('merges accounts by date, newest first', () => {
-    const a = fromPosts('a', [status('5', '2026-01-02T00:00:00Z')], () => undefined);
-    const b = fromPosts('b', [status('900', '2026-01-03T00:00:00Z'), status('800', '2026-01-01T00:00:00Z')], () => undefined);
+    const a = fromPosts('a', [status('5', '2026-01-02T00:00:00Z')]);
+    const b = fromPosts('b', [status('900', '2026-01-03T00:00:00Z'), status('800', '2026-01-01T00:00:00Z')]);
     expect(mergeFeeds([a, b]).map((i) => i.key)).toEqual(['b/s/900', 'a/s/5', 'b/s/800']);
   });
 });

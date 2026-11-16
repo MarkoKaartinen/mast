@@ -2,12 +2,29 @@
   import { onMount } from 'svelte';
   import { accountStore, initAccounts } from '$lib/accounts.svelte';
   import Accounts from '$lib/components/Accounts.svelte';
+  import Column from '$lib/components/Column.svelte';
+  import { COLUMNS, refreshAll, startPolling, unreadCount } from '$lib/feeds.svelte';
   import { t, type Key } from '$lib/i18n';
+  import type { ColumnId } from '$lib/unread';
 
-  const columns: Key[] = ['columnInteractions', 'columnMentions', 'columnMessages', 'columnPosts'];
-  let active = $state(0);
+  const titles: Record<ColumnId, Key> = {
+    interactions: 'columnInteractions',
+    mentions: 'columnMentions',
+    messages: 'columnMessages',
+    posts: 'columnPosts',
+  };
+  let active = $state<ColumnId>('interactions');
 
-  onMount(initAccounts);
+  onMount(() => {
+    void initAccounts();
+    return startPolling();
+  });
+
+  // Fetch whenever the set of accounts changes, including after the first load
+  $effect(() => {
+    void accountStore.list.length;
+    if (accountStore.ready) void refreshAll();
+  });
 </script>
 
 <header class="bar">
@@ -19,20 +36,18 @@
 {/if}
 
 <nav class="tabs" aria-label={t('appName')}>
-  {#each columns as key, i (key)}
-    <button class:active={i === active} onclick={() => (active = i)}>{t(key)}</button>
+  {#each COLUMNS as id (id)}
+    <button class:active={id === active} onclick={() => (active = id)}>
+      {t(titles[id])}
+      {#if unreadCount(id) > 0}<span class="dot" aria-hidden="true"></span>{/if}
+    </button>
   {/each}
 </nav>
 
 <main class="columns">
-  {#each columns as key, i (key)}
-    <section class="column" class:active={i === active}>
-      <h2>{t(key)}</h2>
-      {#if accountStore.ready && accountStore.list.length === 0}
-        <p class="empty">{t('noAccounts')}</p>
-      {:else}
-        <p class="empty">{t('empty')}</p>
-      {/if}
+  {#each COLUMNS as id (id)}
+    <section class="column" class:active={id === active}>
+      <Column column={id} title={titles[id]} hasAccounts={accountStore.list.length > 0} />
     </section>
   {/each}
 </main>
@@ -70,6 +85,14 @@
     color: var(--ctp-text);
     border-bottom-color: var(--ctp-mauve);
   }
+  .dot {
+    display: inline-block;
+    width: 0.5rem;
+    height: 0.5rem;
+    margin-left: 0.25rem;
+    background: var(--ctp-mauve);
+    border-radius: 50%;
+  }
   .columns {
     flex: 1;
     min-height: 0;
@@ -84,14 +107,6 @@
   .column.active {
     display: block;
   }
-  .column h2 {
-    display: none;
-    margin: 0 0 0.75rem;
-    font-size: 1rem;
-  }
-  .empty {
-    color: var(--ctp-overlay1);
-  }
 
   /* Wide screen: four columns side by side, tabs hidden */
   @media (min-width: 64rem) {
@@ -105,9 +120,6 @@
     .column.active {
       display: block;
       border-right: 1px solid var(--ctp-surface0);
-    }
-    .column h2 {
-      display: block;
     }
   }
 </style>

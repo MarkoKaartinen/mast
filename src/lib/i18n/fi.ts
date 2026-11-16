@@ -17,5 +17,13 @@ export const fi: Record<keyof typeof en, string> = {
   loginAgain: 'Kirjaudu uudelleen',
   loginAgainHint: 'Sovellus tarvitsee uusia oikeuksia',
   errorInvalidInstance: 'Anna palvelimen osoite, esim. mastodon.example',
+  kindFavourite: 'Suosikiksi merkitsemä julkaisusi',
+  kindReblog: 'Tehosti julkaisuasi',
+  kindMention: 'Mainitsi sinut',
+  kindMessage: 'Yksityisviesti',
+  kindPost: 'Oma julkaisusi',
+  markRead: 'Merkitse luetuksi',
+  unread: 'lukematonta',
+  loading: 'Ladataan',
   errorLoginFailed: 'Kirjautuminen epäonnistui. Yritä uudelleen.',
 };
