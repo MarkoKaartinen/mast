@@ -1,4 +1,4 @@
-### Unreleased
+### 0.1.1: 2026-11-16
 
 * Show a welcome page with the server field when no account is connected
 * Show only the account name in the account chip of a card, with the server when two accounts share the name
