@@ -46,7 +46,7 @@ Run `npm run build` before `npm run test:e2e`, because the browser tests use the
 
 Serve the `public/` directory as a static site over HTTPS (required for a PWA), with fallback to `index.html`. Example Content Security Policy header (must equal the `<meta>` tag in `index.html`):
 
-    Content-Security-Policy: (added together with the app shell)
+    Content-Security-Policy: default-src 'none'; script-src 'self'; style-src 'self'; img-src 'self' https: data:; media-src https:; connect-src https: wss:; manifest-src 'self'; worker-src 'self'; base-uri 'none'; form-action 'none'
 
 To update:
 
