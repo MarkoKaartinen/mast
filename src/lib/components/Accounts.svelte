@@ -8,6 +8,7 @@
   import ConnectForm from './ConnectForm.svelte';
 
   let open = $state(false);
+  const accountKeys = $derived(accountStore.list.map((a) => a.key));
   let adding = $state(false);
   let root: HTMLElement | undefined = $state();
 
@@ -42,7 +43,7 @@
       <h2>{t('accounts')}</h2>
       <ul>
         {#each accountStore.list as account (account.key)}
-          <li class={accountColorClass(account.key)}>
+          <li class={accountColorClass(account.key, accountKeys)}>
             {#if safeHttpUrl(account.avatar)}
               <img src={safeHttpUrl(account.avatar)} alt="" width="32" height="32" />
             {/if}

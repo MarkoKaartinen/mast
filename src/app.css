@@ -65,14 +65,14 @@ button {
   color: inherit;
 }
 
-/* One color per account, picked by accountColorClass(). Used as var(--account). */
+/* One color per account, picked by accountColorClass(). Neighbours in the list are far apart in hue. Used as var(--account). */
 .acc-0 { --account: var(--ctp-blue); }
-.acc-1 { --account: var(--ctp-green); }
-.acc-2 { --account: var(--ctp-peach); }
+.acc-1 { --account: var(--ctp-peach); }
+.acc-2 { --account: var(--ctp-green); }
 .acc-3 { --account: var(--ctp-pink); }
-.acc-4 { --account: var(--ctp-teal); }
-.acc-5 { --account: var(--ctp-yellow); }
-.acc-6 { --account: var(--ctp-sapphire); }
+.acc-4 { --account: var(--ctp-yellow); }
+.acc-5 { --account: var(--ctp-teal); }
+.acc-6 { --account: var(--ctp-mauve); }
 .acc-7 { --account: var(--ctp-red); }
 
 :focus-visible {
