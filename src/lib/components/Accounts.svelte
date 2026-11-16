@@ -5,42 +5,18 @@
   import { COLUMN_TITLES, feedStore, forgetAccount } from '$lib/feeds.svelte';
   import { t } from '$lib/i18n';
   import { safeHttpUrl } from '$lib/url';
+  import ConnectForm from './ConnectForm.svelte';
 
   let open = $state(false);
-  let server = $state('');
-  let busy = $state(false);
   let adding = $state(false);
   let root: HTMLElement | undefined = $state();
 
   // 401 means the server no longer accepts the token (revoked or expired)
   const expired = (key: string) => feedStore.failed[key]?.some((f) => f.status === '401') ?? false;
   const problems = $derived(accountStore.list.filter((a) => feedStore.failed[a.key] || needsRelogin(a)).length);
-  // With no accounts the form is the only thing to do, so it is always shown
-  const showForm = $derived(adding || accountStore.list.length === 0);
-
-  // Open by itself when there is nothing else to do yet
-  $effect(() => {
-    if (accountStore.ready && accountStore.list.length === 0) open = true;
-  });
-
-  async function submit(event: SubmitEvent) {
-    event.preventDefault();
-    busy = true;
-    await addAccount(server);
-    busy = false;
-  }
-
   function remove(account: (typeof accountStore.list)[number]) {
     if (confirm(t('confirmRemove'))) void removeAccount(account).then(() => forgetAccount(account.key));
   }
-
-  const errorText = $derived(
-    accountStore.error === 'invalidInstance'
-      ? t('errorInvalidInstance')
-      : accountStore.error === 'loginFailed'
-        ? t('errorLoginFailed')
-        : '',
-  );
 
   function detail(key: string): string {
     const failures = feedStore.failed[key] ?? [];
@@ -89,18 +65,11 @@
         {/each}
       </ul>
 
-      {#if showForm}
-        <form onsubmit={submit}>
-          <label>
-            <span>{t('serverLabel')}</span>
-            <input bind:value={server} placeholder={t('serverPlaceholder')} autocapitalize="none" autocomplete="off" spellcheck="false" required />
-          </label>
-          <button type="submit" class="primary" disabled={busy}>{t('connect')}</button>
-        </form>
+      {#if adding}
+        <ConnectForm />
       {:else}
         <button type="button" class="primary" onclick={() => (adding = true)}><Plus size={16} aria-hidden="true" /> {t('addAccount')}</button>
       {/if}
-      {#if errorText}<p class="error" role="alert">{errorText}</p>{/if}
       <p class="version">{t('appName')} · {t('version')} {__APP_VERSION__}</p>
     </section>
   {/if}
@@ -191,28 +160,6 @@
   small {
     color: var(--ctp-subtext0);
   }
-  form {
-    display: flex;
-    flex-wrap: wrap;
-    gap: 0.5rem;
-    align-items: end;
-  }
-  label {
-    flex: 1;
-    display: flex;
-    flex-direction: column;
-    gap: 0.15rem;
-    font-size: 0.85rem;
-    color: var(--ctp-subtext0);
-  }
-  input {
-    padding: 0.4rem 0.6rem;
-    background: var(--ctp-base);
-    color: var(--ctp-text);
-    border: 1px solid var(--ctp-surface1);
-    border-radius: 0.4rem;
-    font: inherit;
-  }
   .primary {
     display: inline-flex;
     align-items: center;
@@ -222,9 +169,6 @@
     color: var(--ctp-crust);
     border: 0;
     border-radius: 0.4rem;
-  }
-  .primary:disabled {
-    opacity: 0.6;
   }
   .icon {
     padding: 0.2rem;
@@ -254,9 +198,5 @@
     border-top: 1px solid var(--ctp-surface0);
     font-size: 0.75rem;
     color: var(--ctp-overlay1);
-  }
-  .error {
-    margin: 0.5rem 0 0;
-    color: var(--ctp-red);
   }
 </style>

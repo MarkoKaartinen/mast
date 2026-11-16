@@ -5,7 +5,6 @@ export const en = {
   columnMessages: 'Direct messages',
   columnPosts: 'Sent posts',
   empty: 'Nothing here yet',
-  noAccounts: 'No accounts connected yet',
   accounts: 'Accounts',
   addAccount: 'Add account',
   serverLabel: 'Server',
@@ -36,4 +35,6 @@ export const en = {
   readItem: 'Read',
   version: 'Version',
   errorLoginFailed: 'Login failed. Try again.',
+  welcomeLead: 'One view for the notifications of all your Mastodon accounts, on any server.',
+  welcomePrivacy: 'No separate account: you log in to your own server and everything stays in this browser.',
 } as const;

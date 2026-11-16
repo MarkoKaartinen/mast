@@ -6,7 +6,7 @@
   import type { ColumnId } from '$lib/unread';
   import FeedCard from './FeedCard.svelte';
 
-  let { column, title, hasAccounts, active }: { column: ColumnId; title: Key; hasAccounts: boolean; active: boolean } = $props();
+  let { column, title, active }: { column: ColumnId; title: Key; active: boolean } = $props();
 
   const unread = $derived(unreadCount(column));
   const items = $derived(columnItems(column));
@@ -24,9 +24,7 @@
   </header>
 
   <div class="list">
-    {#if !hasAccounts}
-      <p class="empty">{t('noAccounts')}</p>
-    {:else if items.length === 0}
+    {#if items.length === 0}
       <div class="empty">
         {#if feedStore.loaded}
           <Icon size={28} aria-hidden="true" />
