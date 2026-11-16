@@ -18,7 +18,7 @@
     <Icon size={18} aria-hidden="true" />
     <h2>{t(title)}</h2>
     {#if unread > 0}<span class="badge" role="status" aria-label={`${unread} ${t('unread')}`}>{unread}</span>{/if}
-    <button type="button" disabled={unread === 0} onclick={() => markRead(column)} title={t('markRead')} aria-label={t('markRead')}>
+    <button type="button" class="touch-target" disabled={unread === 0} onclick={() => markRead(column)} title={t('markRead')} aria-label={t('markRead')}>
       <CheckCheck size={18} aria-hidden="true" />
     </button>
   </header>

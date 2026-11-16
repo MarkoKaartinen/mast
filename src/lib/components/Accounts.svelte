@@ -55,7 +55,7 @@
 />
 
 <div class="menu" bind:this={root}>
-  <button type="button" class="trigger" aria-expanded={open} aria-haspopup="dialog" title={t('accounts')} aria-label={t('accounts')} onclick={() => (open = !open)}>
+  <button type="button" class="trigger touch-target" aria-expanded={open} aria-haspopup="dialog" title={t('accounts')} aria-label={t('accounts')} onclick={() => (open = !open)}>
     <Users size={18} aria-hidden="true" />
     {#if accountStore.list.length}<span class="count">{accountStore.list.length}</span>{/if}
     {#if problems}<span class="problem" aria-hidden="true"></span>{/if}
@@ -82,7 +82,7 @@
                 {t('loginAgain')}
               </button>
             {/if}
-            <button type="button" class="icon" title={t('remove')} aria-label={t('remove')} onclick={() => remove(account)}>
+            <button type="button" class="icon touch-target" title={t('remove')} aria-label={t('remove')} onclick={() => remove(account)}>
               <X size={16} aria-hidden="true" />
             </button>
           </li>

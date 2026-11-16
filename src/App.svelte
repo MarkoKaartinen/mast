@@ -28,7 +28,7 @@
 <header class="bar">
   <h1><Logo size={32} /> {t('appName')}</h1>
   <div class="actions">
-    <button type="button" class="refresh" class:spinning={feedStore.loading} disabled={feedStore.loading} title={t('refresh')} aria-label={t('refresh')} onclick={() => void refreshAll()}>
+    <button type="button" class="refresh touch-target" class:spinning={feedStore.loading} disabled={feedStore.loading} title={t('refresh')} aria-label={t('refresh')} onclick={() => void refreshAll()}>
       <RefreshCw size={18} aria-hidden="true" />
     </button>
     <Accounts />

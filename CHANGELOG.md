@@ -23,3 +23,4 @@
 * Add the bell logo as the app icon, favicon and app bar logo
 * Add the MIT license
 * Show custom emojis in names, posts and content warnings
+* Improve the phone experience: 44 px touch targets, visible height that follows the browser bar and iOS home screen settings
