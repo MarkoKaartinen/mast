@@ -1,6 +1,6 @@
 <script lang="ts">
   import { CircleDot, CheckCheck, Repeat2 } from '@lucide/svelte';
-  import { accountColorClass } from '$lib/accountColor';
+  import { accountColorClass, accountLabel } from '$lib/accountColor';
   import { accountStore } from '$lib/accounts.svelte';
   import { COLUMN_ICONS } from '$lib/columnIcons';
   import type { FeedItem } from '$lib/feed';
@@ -52,7 +52,7 @@
     {#if owner}
       <span class="account" title={owner.acct}>
         {#if ownerAvatar}<img src={ownerAvatar} alt="" width="14" height="14" />{/if}
-        <span>{owner.acct}</span>
+        <span>{accountLabel(owner.acct, accountStore.list.map((a) => a.acct))}</span>
       </span>
     {/if}
     <span class="meta">
