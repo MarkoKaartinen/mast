@@ -6,8 +6,7 @@ import { defaultProfile, mockMastodon, secondProfile } from './mock';
 test.skip(!process.env.SCREENSHOTS, 'Only runs when SCREENSHOTS=1');
 
 async function connectBoth(page: Page) {
-  await mockMastodon(page, defaultProfile);
-  await mockMastodon(page, secondProfile);
+  const servers = [await mockMastodon(page, defaultProfile), await mockMastodon(page, secondProfile)];
   await page.goto('/');
   await page.getByLabel(/server|palvelin/i).fill('mastodon.example');
   await page.getByRole('button', { name: /connect|yhdistä/i }).click();
@@ -18,6 +17,11 @@ async function connectBoth(page: Page) {
   await page.getByLabel(/server/i).fill('social.example');
   await page.getByRole('button', { name: /connect/i }).click();
   await expect(page.getByText('Spring is finally here')).toBeVisible();
+
+  // Something new happens after the accounts were added, so there is something unread to show
+  for (const server of servers) server.release();
+  await page.getByRole('button', { name: /^refresh$/i }).click();
+  await expect(page.getByText('Fresh favourite').first()).toBeVisible();
 }
 
 test('desktop screenshot', async ({ page }) => {

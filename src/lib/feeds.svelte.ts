@@ -3,8 +3,8 @@ import { ApiError } from '$lib/api/client';
 import { fetchConversations, fetchInteractions, fetchMentions, fetchPosts } from '$lib/api/feeds';
 import type { Key } from '$lib/i18n';
 import { fromConversations, fromNotifications, fromPosts, mergeFeeds, mergeRefresh, type FeedItem, type Slot } from '$lib/feed';
-import type { StoredAccount } from '$lib/storage';
-import { isUnread, loadSeen, newestId, saveSeen, type ColumnId } from '$lib/unread';
+import { loadFeeds, saveFeeds, type StoredAccount } from '$lib/storage';
+import { clearSeen, isUnread, loadSeen, newestId, saveSeen, type ColumnId } from '$lib/unread';
 
 export const COLUMNS: ColumnId[] = ['interactions', 'mentions', 'messages', 'posts'];
 
@@ -83,6 +83,44 @@ export const columnItems = (column: ColumnId): FeedItem[] =>
 
 export const unreadCount = (column: ColumnId) => columnItems(column).filter((i) => isItemUnread(column, i)).length;
 
+export const totalUnread = () => COLUMNS.reduce((sum, column) => sum + unreadCount(column), 0);
+
+/**
+ * The newest id of a freshly loaded slot, used as the first read mark of an account and column:
+ * what is already there when an account is added counts as seen, only newer items are unread.
+ * "0" (older than any id) when there is nothing yet, so the first item to arrive is unread.
+ */
+const baselineId = (items: FeedItem[]) => newestId(items.map((i) => i.id)) ?? '0';
+
+/** Saves the items for the offline cache. Failing to save is harmless: the next refresh loads them again. */
+function persistFeeds(): void {
+  void saveFeeds($state.snapshot(feedStore.slots)).catch(() => {});
+}
+
+/** Shows the cached items right away. Items that were loaded in the meantime are newer and win. */
+export async function restoreFeeds(): Promise<void> {
+  const saved = await loadFeeds().catch(() => undefined);
+  if (!saved) return;
+  const valid = new Set(accountStore.list.flatMap((a) => COLUMNS.map((c) => seenKey(c, a.key))));
+  loadSeenMarks(accountStore.list);
+  for (const [key, slot] of Object.entries(saved)) {
+    if (valid.has(key) && !(key in feedStore.slots)) feedStore.slots[key] = slot;
+  }
+}
+
+/** Removes everything kept about an account: its items, read marks and failure state. */
+export function forgetAccount(accountKey: string): void {
+  for (const column of COLUMNS) {
+    const key = seenKey(column, accountKey);
+    delete feedStore.slots[key];
+    delete feedStore.seen[key];
+    clearSeen(accountKey, column);
+  }
+  delete feedStore.failed[accountKey];
+  delete feedStore.pausedUntil[accountKey];
+  persistFeeds();
+}
+
 /** Marks everything currently in the column as read, per account. */
 export function markRead(column: ColumnId): void {
   for (const account of accountStore.list) {
@@ -128,7 +166,12 @@ export async function refreshAll(): Promise<void> {
         }
         try {
           const key = seenKey(column, account.key);
-          feedStore.slots[key] = mergeRefresh(feedStore.slots[key], await loaders[column](account));
+          const fresh = await loaders[column](account);
+          if (feedStore.seen[key] === undefined) {
+            feedStore.seen[key] = baselineId(fresh.items);
+            saveSeen(account.key, column, feedStore.seen[key]);
+          }
+          feedStore.slots[key] = mergeRefresh(feedStore.slots[key], fresh);
         } catch (error) {
           // The old items stay, so a failing request never empties a column
           (failed[account.key] ??= []).push({ column, status: failureStatus(account.key, error) });
@@ -142,6 +185,7 @@ export async function refreshAll(): Promise<void> {
   for (const key of Object.keys(feedStore.slots)) if (!keys.has(key)) delete feedStore.slots[key];
 
   feedStore.failed = failed;
+  persistFeeds();
   feedStore.loading = false;
   feedStore.loaded = true;
   lastRefresh = Date.now();
@@ -168,6 +212,7 @@ export async function loadMore(column: ColumnId): Promise<void> {
         const page = await loaders[column](account, slot.next);
         const known = new Set(slot.items.map((i) => i.key));
         feedStore.slots[key] = { items: [...slot.items, ...page.items.filter((i) => !known.has(i.key))], next: page.next };
+        persistFeeds();
       } catch (error) {
         (feedStore.failed[account.key] ??= []).push({ column, status: failureStatus(account.key, error) });
       }

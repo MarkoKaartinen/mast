@@ -56,8 +56,13 @@ const emojiSvg =
 const previewSvg =
   '<svg xmlns="http://www.w3.org/2000/svg" width="320" height="180"><rect width="320" height="180" fill="#cba6f7"/></svg>';
 
+export interface MockServer {
+  /** From now on the server also has one newer item per column, like something that happened after the first load */
+  release(): void;
+}
+
 /** Fake Mastodon server: the whole API is answered from here, no real server is contacted. */
-export async function mockMastodon(page: Page, profile: Profile = defaultProfile): Promise<void> {
+export async function mockMastodon(page: Page, profile: Profile = defaultProfile): Promise<MockServer> {
   const { instance, user, friend } = profile;
   const blob = { shortcode: 'blobaww', url: `${instance}/emoji.svg`, static_url: `${instance}/emoji.svg` };
   const person = (p: Profile['user']) => ({
@@ -94,6 +99,9 @@ export async function mockMastodon(page: Page, profile: Profile = defaultProfile
   });
 
   const { minutesAgo: age } = profile;
+  let released = false;
+  /** The newest items that appear after release(): ids above all others, a minute old */
+  const fresh = <T>(items: T[]) => (released ? items : []);
 
   const handler = async (route: Route) => {
     const url = new URL(route.request().url());
@@ -117,9 +125,13 @@ export async function mockMastodon(page: Page, profile: Profile = defaultProfile
         return json(me);
       case '/api/v1/notifications': {
         if (url.searchParams.getAll('types[]').includes('mention')) {
-          return json([notification('20', 'mention', profile.mention, age.mention)]);
+          return json([...fresh([notification('21', 'mention', 'Fresh mention', 1)]), notification('20', 'mention', profile.mention, age.mention)]);
         }
-        const items = [notification('12', 'favourite', profile.favourite, age.favourite), notification('11', 'reblog', profile.boost, age.boost)];
+        const items = [
+          ...fresh([notification('13', 'favourite', 'Fresh favourite', 1)]),
+          notification('12', 'favourite', profile.favourite, age.favourite),
+          notification('11', 'reblog', profile.boost, age.boost),
+        ];
         if (!profile.extras) return json(items);
         // Favourites and boosts have a second, older page
         if (url.searchParams.get('max_id')) return json([notification('5', 'favourite', 'Older favourite', 3000)]);
@@ -128,12 +140,20 @@ export async function mockMastodon(page: Page, profile: Profile = defaultProfile
         return route.fulfill({ headers: { link: next, 'access-control-expose-headers': 'Link' }, json: items });
       }
       case '/api/v1/conversations':
-        return json([{ id: '5', unread: true, accounts: [other], last_status: status('30', profile.message, age.message, other) }]);
+        return json([
+          {
+            id: '5',
+            unread: true,
+            accounts: [other],
+            last_status: released ? status('31', 'Fresh message', 1, other) : status('30', profile.message, age.message, other),
+          },
+        ]);
       case `/api/v1/accounts/${me.id}/statuses`: {
         const own = status('40', profile.post, age.post);
-        if (!profile.extras) return json([own]);
+        const newest = fresh([status('41', 'Fresh post', 1)]);
+        if (!profile.extras) return json([...newest, own]);
         const image = { id: 'm1', type: 'image', url: `${instance}/preview.svg`, preview_url: `${instance}/preview.svg`, description: 'A purple square' };
-        return json([{ ...own, media_attachments: [image] }]);
+        return json([...newest, { ...own, media_attachments: [image] }]);
       }
       case `/avatar-${user.id}.svg`:
         return svg(avatar(user.color, user.name[0]));
@@ -148,4 +168,9 @@ export async function mockMastodon(page: Page, profile: Profile = defaultProfile
     }
   };
   await page.route(`${instance}/**`, handler);
+  return {
+    release: () => {
+      released = true;
+    },
+  };
 }

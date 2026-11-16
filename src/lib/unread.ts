@@ -32,6 +32,14 @@ export function saveSeen(accountKey: string, column: ColumnId, id: string): void
   }
 }
 
+export function clearSeen(accountKey: string, column: ColumnId): void {
+  try {
+    localStorage.removeItem(`${PREFIX}${column}.${accountKey}`);
+  } catch {
+    // Nothing to clean up if storage is blocked
+  }
+}
+
 /** An item is unread when it is newer than the last ID marked as read. Without a mark everything is unread. */
 export function isUnread(id: string, seen: string | undefined): boolean {
   return seen === undefined || compareIds(id, seen) > 0;

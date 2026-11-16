@@ -2,7 +2,7 @@
   import { CircleAlert, Plus, Users, X } from '@lucide/svelte';
   import { accountColorClass } from '$lib/accountColor';
   import { accountStore, addAccount, needsRelogin, removeAccount } from '$lib/accounts.svelte';
-  import { COLUMN_TITLES, feedStore } from '$lib/feeds.svelte';
+  import { COLUMN_TITLES, feedStore, forgetAccount } from '$lib/feeds.svelte';
   import { t } from '$lib/i18n';
   import { safeHttpUrl } from '$lib/url';
 
@@ -31,7 +31,7 @@
   }
 
   function remove(account: (typeof accountStore.list)[number]) {
-    if (confirm(t('confirmRemove'))) void removeAccount(account);
+    if (confirm(t('confirmRemove'))) void removeAccount(account).then(() => forgetAccount(account.key));
   }
 
   const errorText = $derived(

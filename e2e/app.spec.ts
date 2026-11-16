@@ -1,12 +1,21 @@
 import { expect, test } from '@playwright/test';
-import { mockMastodon } from './mock';
+import { mockMastodon, type MockServer } from './mock';
+
+let server: MockServer;
 
 test.beforeEach(async ({ page }) => {
-  await mockMastodon(page);
+  server = await mockMastodon(page);
 });
 
 async function openAccounts(page: import('@playwright/test').Page) {
   await page.getByRole('button', { name: /^accounts$|^tilit$/i }).click();
+}
+
+/** Something happens on the server after the first load, then the user refreshes */
+async function refreshWithNews(page: import('@playwright/test').Page) {
+  server.release();
+  await page.getByRole('button', { name: /^refresh$|^päivitä$/i }).click();
+  await expect(page.getByText('Fresh favourite')).toBeVisible();
 }
 
 async function connect(page: import('@playwright/test').Page) {
@@ -15,8 +24,10 @@ async function connect(page: import('@playwright/test').Page) {
   await page.getByRole('button', { name: /connect|yhdistä/i }).click();
 }
 
-test('connects an account and shows the columns with unread counts', async ({ page }) => {
+test('connects an account, counts only what comes after as unread and shows the count in the title', async ({ page }) => {
   await page.setViewportSize({ width: 1280, height: 800 });
+  const violations: string[] = [];
+  page.on('console', (message) => message.text().includes('Content Security Policy') && violations.push(message.text()));
   await connect(page);
 
   await expect(page.getByText('Liked post')).toBeVisible();
@@ -32,7 +43,16 @@ test('connects an account and shows the columns with unread counts', async ({ pa
   await expect(page.locator('.card strong img.emoji').first()).toBeVisible();
   await expect(page.locator('.content img.emoji').first()).toBeVisible();
   await expect(page.getByText(':blobaww:')).toHaveCount(0);
+
+  // What was there when the account was added counts as seen
+  await expect(page.locator('.badge')).toHaveCount(0);
+  await expect(page).toHaveTitle('Mastodon Tools');
+
+  await refreshWithNews(page);
+  await expect(page.locator('.badge')).toHaveCount(4);
+  await expect(page).toHaveTitle('(4) Mastodon Tools');
   await page.screenshot({ path: 'test-results/desktop.png' });
+  expect(violations).toEqual([]);
   await openAccounts(page);
   await page.screenshot({ path: 'test-results/accounts.png' });
 });
@@ -41,9 +61,10 @@ test('marks a column as read and remembers it after a reload', async ({ page }) 
   await page.setViewportSize({ width: 1280, height: 800 });
   await connect(page);
   await expect(page.getByText('Liked post')).toBeVisible();
+  await refreshWithNews(page);
 
   const interactions = page.locator('section.column').first();
-  await expect(interactions.locator('.badge')).toHaveText('2');
+  await expect(interactions.locator('.badge')).toHaveText('1');
   await interactions.getByRole('button', { name: /mark as read|merkitse luetuksi/i }).click();
   await expect(interactions.locator('.badge')).toHaveCount(0);
   await page.screenshot({ path: 'test-results/read.png' });
@@ -159,4 +180,39 @@ test('asks to log in again when the token is no longer accepted', async ({ page 
 
   await openAccounts(page);
   await expect(page.getByRole('button', { name: /log in again|kirjaudu uudelleen/i })).toBeVisible();
+});
+
+test('shows the saved items when the server cannot be reached', async ({ page }) => {
+  await page.setViewportSize({ width: 1280, height: 800 });
+  await connect(page);
+  await expect(page.getByText('Liked post')).toBeVisible();
+  await expect(page.getByText('Secret hello')).toBeVisible();
+
+  // The server is gone: the page itself still loads
+  await page.route('https://mastodon.example/**', (route) => route.abort());
+  await page.reload();
+
+  await expect(page.getByText('Liked post')).toBeVisible();
+  await expect(page.getByText('Secret hello')).toBeVisible();
+  await openAccounts(page);
+  await expect(page.getByTitle(/could not load this account.*network/i)).toBeVisible();
+});
+
+test('removing an account also removes its saved items and read marks', async ({ page }) => {
+  await page.setViewportSize({ width: 1280, height: 800 });
+  await connect(page);
+  await expect(page.getByText('Liked post')).toBeVisible();
+  await refreshWithNews(page);
+  await page.locator('section.column').first().getByRole('button', { name: /mark as read/i }).click();
+  expect(await page.evaluate(() => Object.keys(localStorage).filter((k) => k.startsWith('mast.seen.')).length)).toBeGreaterThan(0);
+
+  page.once('dialog', (dialog) => dialog.accept());
+  await openAccounts(page);
+  await page.getByRole('button', { name: /^remove$|^poista$/i }).click();
+
+  await expect(page.getByText('Liked post')).toHaveCount(0);
+  expect(await page.evaluate(() => Object.keys(localStorage).filter((k) => k.startsWith('mast.seen.')).length)).toBe(0);
+  // After a reload nothing comes back from the cache
+  await page.reload();
+  await expect(page.getByText('Liked post')).toHaveCount(0);
 });

@@ -25,3 +25,7 @@
 * Show custom emojis in names, posts and content warnings
 * Improve the phone experience: 44 px touch targets, visible height that follows the browser bar and iOS home screen settings
 * Add screenshots to the README, made from mock data with two accounts
+* Count only items that arrive after an account was added as unread
+* Show the number of unread items in the page title and on the icon of the installed app
+* Save the last loaded items so that they show at once and when a server cannot be reached
+* Remove the saved items and read marks of an account when it is removed

@@ -17,7 +17,7 @@ The view has four columns (tabs on a narrow screen). Each one combines all conne
 * Direct messages, shown as conversations
 * Posts sent by your accounts
 
-Accounts can be on different servers and are managed behind the people icon in the top right corner. Every account has its own color, shown on the cards, so you see which account an item concerns. Each column shows how many items are unread and has a mark as read button. The read state is kept in the browser (local storage), because the Mastodon API has no per-notification read state for this use.
+Accounts can be on different servers and are managed behind the people icon in the top right corner. Every account has its own color, shown on the cards, so you see which account an item concerns. Each column shows how many items are unread and has a mark as read button. What is already there when an account is added counts as seen: only items that arrive later are unread. The total number of unread items is shown in the page title and, in an installed app, on its icon. The read state is kept in the browser (local storage), because the Mastodon API has no per-notification read state for this use.
 
 The first version is read only. Custom emojis are shown as images. Dark theme only ([Catppuccin Mocha](https://catppuccin.com/palette/)). UI languages are Finnish and English.
 
@@ -26,6 +26,7 @@ The first version is read only. Custom emojis are shown as images. Dark theme on
 * Login uses OAuth 2 authorization code flow with PKCE. The app registers itself on each server with `POST /api/v1/apps`, so any server works. Mastodon only provisions confidential clients, so the client secret it returns is stored in the browser together with the access token. PKCE needs Mastodon 4.3 or newer.
 * Notifications: `GET /api/v1/notifications` filtered by type. Direct messages: `GET /api/v1/conversations`. Own posts: `GET /api/v1/accounts/:id/statuses`.
 * The columns are refreshed every 5 minutes while the page is visible, and with the refresh button. There is no live streaming: it would keep a connection open to every server. Mastodon allows 300 requests per 5 minutes per account and per IP, and an account that hits the limit is left alone until it resets.
+* The last loaded items, including direct messages, are saved in the browser (IndexedDB) so that they show at once and when a server cannot be reached. Removing an account removes its saved items and read marks.
 * Tokens and cached data stay in the browser. Nothing is sent to any server other than your own Mastodon servers.
 * Web Push is not supported, because it needs a server component. Notifications are shown while the app is open.
 

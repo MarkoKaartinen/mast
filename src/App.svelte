@@ -6,15 +6,26 @@
   import Column from '$lib/components/Column.svelte';
   import Logo from '$lib/components/Logo.svelte';
   import { COLUMN_ICONS } from '$lib/columnIcons';
-  import { COLUMN_TITLES, COLUMNS, feedStore, refreshAll, startPolling, unreadCount } from '$lib/feeds.svelte';
+  import { COLUMN_TITLES, COLUMNS, feedStore, refreshAll, restoreFeeds, startPolling, totalUnread, unreadCount } from '$lib/feeds.svelte';
   import { t } from '$lib/i18n';
   import type { ColumnId } from '$lib/unread';
 
   let active = $state<ColumnId>('interactions');
 
   onMount(() => {
-    void initAccounts();
+    void initAccounts().then(restoreFeeds);
     return startPolling();
+  });
+
+  // The number of unread items in the tab title and, in an installed app, on its icon
+  $effect(() => {
+    const count = totalUnread();
+    document.title = count > 0 ? `(${count}) ${t('appName')}` : t('appName');
+    try {
+      if ('setAppBadge' in navigator) void (count > 0 ? navigator.setAppBadge(count) : navigator.clearAppBadge()).catch(() => {});
+    } catch {
+      // The badge is a bonus: not supported or not allowed is fine
+    }
   });
 
   // Fetch whenever the set of accounts changes, including after the first load.
