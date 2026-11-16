@@ -55,11 +55,19 @@
         <span>{owner.acct}</span>
       </span>
     {/if}
-    {#if link}
-      <a href={link} target="_blank" rel="noopener noreferrer" title={fullTime}><time datetime={item.createdAt}>{time}</time></a>
-    {:else}
-      <time datetime={item.createdAt} title={fullTime}>{time}</time>
-    {/if}
+    <span class="meta">
+      {#if link}
+        <a href={link} target="_blank" rel="noopener noreferrer" title={fullTime}><time datetime={item.createdAt}>{time}</time></a>
+      {:else}
+        <time datetime={item.createdAt} title={fullTime}>{time}</time>
+      {/if}
+      <!-- The state is shown by the edge color and this icon, the card itself looks the same -->
+      {#if unread}
+        <span class="state unread-icon" title={t('unreadItem')}><CircleDot size={16} aria-label={t('unreadItem')} /></span>
+      {:else}
+        <span class="state" title={t('readItem')}><CheckCheck size={16} aria-label={t('readItem')} /></span>
+      {/if}
+    </span>
   </div>
 
   <header>
@@ -68,12 +76,6 @@
       <strong>{item.from.displayName}</strong>
       <small>{item.from.acct}</small>
     </div>
-    <!-- The state is shown by the edge color and this icon, the card itself looks the same -->
-    {#if unread}
-      <span class="state unread-icon" title={t('unreadItem')}><CircleDot size={16} aria-label={t('unreadItem')} /></span>
-    {:else}
-      <span class="state" title={t('readItem')}><CheckCheck size={16} aria-label={t('readItem')} /></span>
-    {/if}
   </header>
 
   <p class="action {item.kind}"><Icon size={14} aria-hidden="true" /> {t(labels[item.kind])}</p>
@@ -239,6 +241,12 @@
   }
   .account img {
     border-radius: 50%;
+  }
+  .meta {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.4rem;
+    flex-shrink: 0;
   }
   .top a {
     color: inherit;
