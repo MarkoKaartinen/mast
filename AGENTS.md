@@ -1,0 +1,92 @@
+# AGENTS.md
+
+Guidance for AI agents and contributors working on Mastodon Tools (MAST). See README.md for what the app does.
+
+## Project
+
+A client-only PWA (no backend) that shows notifications, mentions, direct messages and sent posts of several Mastodon accounts in four columns. Svelte 5, Vite, TypeScript. The build output goes to `public/`. Dark theme only, Catppuccin Mocha. Use only the official Mastodon API (https://docs.joinmastodon.org/client/intro/).
+
+## Public repository
+
+This is a public repository. Never commit, hardcode or mention, in code, comments, tests, fixtures or commit messages:
+
+* Real names, emails, handles or other personal details of any person (the one exception is the copyright line in LICENSE)
+* Tokens, client secrets, passwords or any credentials (tests use fake values and mock data)
+* Real server URLs, domains or IP addresses (use `mast.example` for this app and `mastodon.example` for Mastodon servers)
+* File paths with a username
+
+Before committing, scan the staged diff for these.
+
+## Commits and branches
+
+* Until the first release (0.1.0) the MVP is built directly on `main`. After that, work on a new branch for every change, never directly on `main`. Name it `type/short-description` with a type such as `fix`, `feature`, `docs` or `chore`
+* One logical change per commit
+* One concise line, sentence case, present tense. No long explanations in the message, no emojis
+* Commit messages and PR descriptions are in English
+* Never add Co-Authored-By lines or any AI attribution (watermarks, "Generated with" lines) to commits or pull requests
+* Update CHANGELOG.md in the same change (see Changelog)
+* Stage only the relevant files, never `git add -A`
+* Run `git status` after committing to verify nothing is left over
+* Never push, merge or deploy without being asked
+* After a merge, switch to main, pull and delete the local branch
+
+## Working method
+
+* Follow DRY, KISS and YAGNI. Do not build features, abstractions or configuration "just in case"
+* Reproduce a reported bug with a test first (the Mastodon API is mocked in `e2e/mock.ts`), then fix it
+* Never patch just the line you see: trace the whole chain (callers, stores, tests, translations) first
+* Verify before claiming success: `npm run check`, `npm test`, `npm run build`, then `npm run test:e2e`. The browser tests run against the build in `public/`, so build first. For UI changes, look at a rendered screenshot
+* Do not guess Mastodon behaviour: check the official docs or source
+* A limit needs a reason (an API limit or a decision), a named constant and a comment
+* Never clean up or delete data or files nobody asked about
+* Ask before installing dependencies, starting services or doing anything outside the repository
+
+## Code style
+
+* Code, comments, tests and docs are in English. Only UI strings are translated (`src/lib/i18n/en.ts` and `fi.ts`, always the same keys). Wording follows Mastodon's own translations (Finnish: julkaisu, tehosta, suosikki, palvelin)
+* No emojis in code, commits or UI. Icons are Lucide
+* Prefer CSS classes and theme variables (Catppuccin Mocha) over inline styles
+* Layout: four columns on a wide screen, tabs on a narrow one
+
+## Changelog
+
+CHANGELOG.md lists every released version, newest first, and the changes waiting for the next release. Update it with each change.
+
+* Format: a `### x.y.z: yyyy-mm-dd` heading per version, no main "Changelog" heading, no sub headings
+* Bullets with `*`, one line per change, present tense, concise, no repetition
+* No formatting except inline code
+* Changes that are not released yet go under a `### Unreleased` heading at the top (no date). Every change adds its own lines there and never touches the version
+* A contributor's PR adds only its changelog line, never a version. The maintainer picks the version at release time
+* A release renames the heading to `### x.y.z: yyyy-mm-dd`, bumps `package.json` and `package-lock.json` (the version shown in the app comes from there) and checks today's date. After it is merged, tag `vx.y.z` and create the GitHub release (title `vx.y.z`, like the tag) with this body (the changes are copied from CHANGELOG.md, the update command is the same every time, Notes lists only what a release needs beyond it):
+
+```
+<the bullets of this version from CHANGELOG.md>
+
+Update:
+
+    git fetch
+    git checkout vx.y.z
+    npm ci
+    npm run build
+
+Notes:
+
+* Log in again: yes/no (OAuth scopes changed)
+* Other steps: none
+```
+
+* Sensible semver, chosen at release time: patch by default (a fix, a tweak or a small feature, also several together). Minor when something changes profoundly or the release collects a clearly larger set of changes, major only for something like a full redesign of the UI. The first release is 0.1.0
+* After every merged PR, say whether a release is worth making now: what has piled up under Unreleased, the version it would get, whether users must log in again and any other step. It is only a suggestion: never bump the version, tag or release without being asked
+* A version is created per release, not per day
+
+## Security
+
+* Server data reaches the page only through the sanitizers in `src/lib/html.ts`, and every server address in a link or media element goes through `safeHttpUrl()` in `src/lib/url.ts`
+* Keep the OAuth scopes minimal (`SCOPES` in `src/lib/api/oauth.ts`). Changing them can require a re-login, which the app asks for itself; mention it in the README
+* Keep PKCE and the state check. The `<meta>` CSP in `index.html` and the header example in the README must stay equal
+
+## Documentation
+
+* Keep README.md up to date in the same change as the feature
+* Sentence case headings, real heading levels (never bold text as a heading), an empty line after each heading
+* No separator lines or decorated headings
