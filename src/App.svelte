@@ -1,13 +1,22 @@
 <script lang="ts">
+  import { onMount } from 'svelte';
+  import { accountStore, initAccounts } from '$lib/accounts.svelte';
+  import Accounts from '$lib/components/Accounts.svelte';
   import { t, type Key } from '$lib/i18n';
 
   const columns: Key[] = ['columnInteractions', 'columnMentions', 'columnMessages', 'columnPosts'];
   let active = $state(0);
+
+  onMount(initAccounts);
 </script>
 
 <header class="bar">
   <h1>{t('appName')}</h1>
 </header>
+
+{#if accountStore.ready}
+  <Accounts />
+{/if}
 
 <nav class="tabs" aria-label={t('appName')}>
   {#each columns as key, i (key)}
@@ -19,7 +28,11 @@
   {#each columns as key, i (key)}
     <section class="column" class:active={i === active}>
       <h2>{t(key)}</h2>
-      <p class="empty">{t('noAccounts')}</p>
+      {#if accountStore.ready && accountStore.list.length === 0}
+        <p class="empty">{t('noAccounts')}</p>
+      {:else}
+        <p class="empty">{t('empty')}</p>
+      {/if}
     </section>
   {/each}
 </main>
