@@ -26,5 +26,7 @@ export const fi: Record<keyof typeof en, string> = {
   unread: 'lukematonta',
   loading: 'Ladataan',
   loadFailed: 'Tilin tietojen haku epäonnistui',
+  refresh: 'Päivitä',
+  rateLimitedHint: 'Liikaa pyyntöjä, odotetaan ennen uutta yritystä',
   errorLoginFailed: 'Kirjautuminen epäonnistui. Yritä uudelleen.',
 };

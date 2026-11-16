@@ -76,34 +76,6 @@ test('hides the server form once an account exists', async ({ page }) => {
   await expect(page.getByLabel(/server|palvelin/i)).toBeVisible();
 });
 
-test('refreshes when the stream reports a notification', async ({ page }) => {
-  await page.setViewportSize({ width: 1280, height: 800 });
-  let streamed: { send(message: string): void } | undefined;
-  await page.routeWebSocket('wss://mastodon.example/api/v1/streaming?stream=user', (ws) => {
-    streamed = ws;
-  });
-  await connect(page);
-  await expect(page.getByText('Liked post')).toBeVisible();
-  await expect(page.getByText('Brand new favourite')).toHaveCount(0);
-
-  // From now on the server has one more favourite
-  await page.route('https://mastodon.example/api/v1/notifications**', (route) => {
-    const types = new URL(route.request().url()).searchParams.getAll('types[]');
-    const item = {
-      id: '99',
-      type: 'favourite',
-      created_at: '2026-01-03T10:00:00.000Z',
-      account: { id: '2', acct: 'friend@other.example', display_name: 'A Friend', avatar: '' },
-      status: { id: 's99', created_at: '2026-01-03T10:00:00.000Z', url: null, content: '<p>Brand new favourite</p>', spoiler_text: '', visibility: 'public', account: { id: '1', acct: 'ronsu', display_name: 'Ronsu', avatar: '' }, reblog: null },
-    };
-    return route.fulfill({ json: types.includes('favourite') ? [item] : [] });
-  });
-  await expect.poll(() => streamed).toBeDefined();
-  streamed!.send(JSON.stringify({ stream: ['user'], event: 'notification', payload: '{}' }));
-
-  await expect(page.getByText('Brand new favourite')).toBeVisible();
-});
-
 test('shows an empty column as empty and loads each feed only once', async ({ page }) => {
   await page.setViewportSize({ width: 1280, height: 800 });
   let conversationRequests = 0;
@@ -121,4 +93,28 @@ test('shows an empty column as empty and loads each feed only once', async ({ pa
   // A refresh loop would keep requesting while nothing changes
   await page.waitForTimeout(1500);
   expect(conversationRequests).toBe(1);
+});
+
+test('refreshes with the button and keeps old items when the server rate limits', async ({ page }) => {
+  await page.setViewportSize({ width: 1280, height: 800 });
+  await connect(page);
+  await expect(page.getByText('Liked post')).toBeVisible();
+
+  let requests = 0;
+  await page.route('https://mastodon.example/api/v1/**', (route) => {
+    requests++;
+    return route.fulfill({ status: 429, json: { error: 'Too many requests' } });
+  });
+  await page.getByRole('button', { name: /^refresh$|^päivitä$/i }).click();
+
+  await expect(page.getByTitle(/Favourites and boosts: 429.*Too many requests/i)).toBeVisible();
+  // Nothing disappeared
+  await expect(page.getByText('Liked post')).toBeVisible();
+  await expect(page.getByText('Secret hello')).toBeVisible();
+
+  // The account is now left alone, so another click sends no requests
+  const before = requests;
+  await page.getByRole('button', { name: /^refresh$|^päivitä$/i }).click();
+  await page.waitForTimeout(500);
+  expect(requests).toBe(before);
 });

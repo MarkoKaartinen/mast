@@ -40,7 +40,7 @@
         </span>
         {#if feedStore.failed[account.key]}
           {@const detail = feedStore.failed[account.key].map((f) => `${t(COLUMN_TITLES[f.column])}: ${f.status}`).join(', ')}
-          <span class="failed" title={`${t('loadFailed')} (${detail})`}><CircleAlert size={16} aria-label={t('loadFailed')} /></span>
+          <span class="failed" title={`${t('loadFailed')} (${detail})${feedStore.failed[account.key].some((f) => f.status === '429') ? '. ' + t('rateLimitedHint') : ''}`}><CircleAlert size={16} aria-label={t('loadFailed')} /></span>
         {/if}
         {#if needsRelogin(account)}
           <button type="button" class="warn" title={t('loginAgainHint')} onclick={() => addAccount(account.instance)}>

@@ -1,11 +1,11 @@
 <script lang="ts">
+  import { RefreshCw } from '@lucide/svelte';
   import { onMount, untrack } from 'svelte';
   import { accountStore, initAccounts } from '$lib/accounts.svelte';
   import Accounts from '$lib/components/Accounts.svelte';
   import Column from '$lib/components/Column.svelte';
-  import { COLUMNS, COLUMN_TITLES, refreshAll, startPolling, unreadCount } from '$lib/feeds.svelte';
+  import { COLUMNS, COLUMN_TITLES, feedStore, refreshAll, startPolling, unreadCount } from '$lib/feeds.svelte';
   import { t } from '$lib/i18n';
-  import { connectStream } from '$lib/streaming';
   import type { ColumnId } from '$lib/unread';
 
   let active = $state<ColumnId>('interactions');
@@ -21,17 +21,13 @@
     void accountStore.list.length;
     if (accountStore.ready) untrack(() => void refreshAll());
   });
-
-  // One live stream per account: it only tells when to refresh, the columns are always loaded from the REST API
-  $effect(() => {
-    const accounts = accountStore.list;
-    const stops = untrack(() => accounts.map((account) => connectStream(account, () => void refreshAll())));
-    return () => stops.forEach((stop) => stop());
-  });
 </script>
 
 <header class="bar">
   <h1>{t('appName')}</h1>
+  <button type="button" class="refresh" class:spinning={feedStore.loading} disabled={feedStore.loading} title={t('refresh')} aria-label={t('refresh')} onclick={() => void refreshAll()}>
+    <RefreshCw size={18} />
+  </button>
 </header>
 
 {#if accountStore.ready}
@@ -61,6 +57,9 @@
     flex-direction: column;
   }
   .bar {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
     padding: 0.5rem 1rem;
     background: var(--ctp-mantle);
     border-bottom: 1px solid var(--ctp-surface0);
@@ -69,6 +68,26 @@
     margin: 0;
     font-size: 1.1rem;
     color: var(--ctp-mauve);
+  }
+  .refresh {
+    display: inline-flex;
+    padding: 0.35rem;
+    background: none;
+    border: 0;
+    border-radius: 0.4rem;
+    color: var(--ctp-subtext0);
+    cursor: pointer;
+  }
+  .refresh:disabled {
+    cursor: default;
+  }
+  .spinning :global(svg) {
+    animation: spin 1s linear infinite;
+  }
+  @keyframes spin {
+    to {
+      transform: rotate(360deg);
+    }
   }
   .tabs {
     display: flex;

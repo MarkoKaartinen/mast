@@ -15,8 +15,14 @@ export const COLUMN_TITLES: Record<ColumnId, Key> = {
   posts: 'columnPosts',
 };
 
-/** How often to poll while the page is visible. The streaming API replaces this later. */
-export const POLL_INTERVAL_MS = 60_000;
+/**
+ * How often to refresh while the page is visible. A refresh costs four requests per account and Mastodon
+ * allows 300 per 5 minutes per account and per IP, so 5 minutes leaves plenty of room.
+ */
+export const POLL_INTERVAL_MS = 5 * 60_000;
+
+/** How often to check whether a refresh is due. */
+const POLL_CHECK_MS = 30_000;
 
 const loaders: Record<ColumnId, (account: StoredAccount) => Promise<FeedItem[]>> = {
   interactions: async (a) => fromNotifications(a.key, await fetchInteractions(a)),
@@ -26,7 +32,10 @@ const loaders: Record<ColumnId, (account: StoredAccount) => Promise<FeedItem[]>>
 };
 
 export const feedStore = $state({
-  items: { interactions: [], mentions: [], messages: [], posts: [] } as Record<ColumnId, FeedItem[]>,
+  /** Items per column and account, keyed "<column>/<account key>". Kept when a refresh fails. */
+  slots: {} as Record<string, FeedItem[]>,
+  /** Accounts that hit the rate limit: no requests until this time (ms since epoch) */
+  pausedUntil: {} as Record<string, number>,
   /** Last item marked as read, keyed "<column>/<account key>" */
   seen: {} as Record<string, string | undefined>,
   /** What failed in the last refresh, keyed by account: the column and the HTTP status ("network" if none) */
@@ -51,12 +60,16 @@ function loadSeenMarks(accounts: StoredAccount[]): void {
 export const isItemUnread = (column: ColumnId, item: FeedItem) =>
   isUnread(item.id, feedStore.seen[seenKey(column, item.accountKey)]);
 
-export const unreadCount = (column: ColumnId) => feedStore.items[column].filter((i) => isItemUnread(column, i)).length;
+/** All accounts' items of a column, newest first. */
+export const columnItems = (column: ColumnId): FeedItem[] =>
+  mergeFeeds(accountStore.list.map((a) => feedStore.slots[seenKey(column, a.key)] ?? []));
+
+export const unreadCount = (column: ColumnId) => columnItems(column).filter((i) => isItemUnread(column, i)).length;
 
 /** Marks everything currently in the column as read, per account. */
 export function markRead(column: ColumnId): void {
   for (const account of accountStore.list) {
-    const newest = newestId(feedStore.items[column].filter((i) => i.accountKey === account.key).map((i) => i.id));
+    const newest = newestId((feedStore.slots[seenKey(column, account.key)] ?? []).map((i) => i.id));
     if (!newest) continue;
     feedStore.seen[seenKey(column, account.key)] = newest;
     saveSeen(account.key, column, newest);
@@ -65,11 +78,12 @@ export function markRead(column: ColumnId): void {
 
 /** Set when a refresh was requested while one was running, so that the change is not missed. */
 let refreshAgain = false;
+let lastRefresh = 0;
 
 export async function refreshAll(): Promise<void> {
   const accounts = accountStore.list;
   if (accounts.length === 0) {
-    for (const c of COLUMNS) feedStore.items[c] = [];
+    feedStore.slots = {};
     return;
   }
   if (feedStore.loading) {
@@ -79,36 +93,50 @@ export async function refreshAll(): Promise<void> {
   feedStore.loading = true;
   loadSeenMarks(accounts);
   const failed: typeof feedStore.failed = {};
-  const next = {} as Record<ColumnId, FeedItem[]>;
+  const now = Date.now();
+
   await Promise.all(
-    COLUMNS.map(async (column) => {
-      const results = await Promise.allSettled(accounts.map((a) => loaders[column](a)));
-      next[column] = mergeFeeds(
-        results.flatMap((r, i) => {
-          if (r.status === 'fulfilled') return [r.value];
-          const status = r.reason instanceof ApiError ? String(r.reason.status) : 'network';
-          (failed[accounts[i].key] ??= []).push({ column, status });
-          return [];
-        }),
-      );
-    }),
+    accounts.flatMap((account) =>
+      COLUMNS.map(async (column) => {
+        if ((feedStore.pausedUntil[account.key] ?? 0) > now) {
+          (failed[account.key] ??= []).push({ column, status: '429' });
+          return;
+        }
+        try {
+          feedStore.slots[seenKey(column, account.key)] = await loaders[column](account);
+        } catch (error) {
+          // The old items stay, so a failing request never empties a column
+          const status = error instanceof ApiError ? String(error.status) : 'network';
+          (failed[account.key] ??= []).push({ column, status });
+          if (error instanceof ApiError && error.pauseMs) feedStore.pausedUntil[account.key] = Date.now() + error.pauseMs;
+        }
+      }),
+    ),
   );
-  for (const column of COLUMNS) feedStore.items[column] = next[column];
+
+  // Forget the items of accounts that were removed
+  const keys = new Set(accounts.flatMap((a) => COLUMNS.map((c) => seenKey(c, a.key))));
+  for (const key of Object.keys(feedStore.slots)) if (!keys.has(key)) delete feedStore.slots[key];
+
   feedStore.failed = failed;
   feedStore.loading = false;
   feedStore.loaded = true;
+  lastRefresh = Date.now();
   if (refreshAgain) {
     refreshAgain = false;
     await refreshAll();
   }
 }
 
-/** Starts polling and refreshes when the tab becomes visible again. Returns a function that stops it. */
+/**
+ * Refreshes when the page is visible and the data is older than the poll interval.
+ * Checking on tab switches too keeps a returning user's view fresh without refreshing on every switch.
+ */
 export function startPolling(): () => void {
   const tick = () => {
-    if (document.visibilityState === 'visible') void refreshAll();
+    if (document.visibilityState === 'visible' && Date.now() - lastRefresh >= POLL_INTERVAL_MS) void refreshAll();
   };
-  const timer = setInterval(tick, POLL_INTERVAL_MS);
+  const timer = setInterval(tick, POLL_CHECK_MS);
   document.addEventListener('visibilitychange', tick);
   return () => {
     clearInterval(timer);

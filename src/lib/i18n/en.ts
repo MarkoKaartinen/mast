@@ -24,5 +24,7 @@ export const en = {
   unread: 'unread',
   loading: 'Loading',
   loadFailed: 'Could not load this account',
+  refresh: 'Refresh',
+  rateLimitedHint: 'Too many requests, waiting before trying again',
   errorLoginFailed: 'Login failed. Try again.',
 } as const;

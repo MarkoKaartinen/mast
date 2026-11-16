@@ -1,6 +1,6 @@
 <script lang="ts">
   import { CheckCheck } from '@lucide/svelte';
-  import { feedStore, isItemUnread, markRead, unreadCount } from '$lib/feeds.svelte';
+  import { columnItems, feedStore, isItemUnread, markRead, unreadCount } from '$lib/feeds.svelte';
   import { t, type Key } from '$lib/i18n';
   import type { ColumnId } from '$lib/unread';
   import FeedCard from './FeedCard.svelte';
@@ -8,7 +8,7 @@
   let { column, title, hasAccounts }: { column: ColumnId; title: Key; hasAccounts: boolean } = $props();
 
   const unread = $derived(unreadCount(column));
-  const items = $derived(feedStore.items[column]);
+  const items = $derived(columnItems(column));
 </script>
 
 <div class="head">
