@@ -40,7 +40,7 @@ Svelte 5, Vite and TypeScript. The build is a static site in `public/`. PWA supp
     npm run build
     npm run test:e2e
 
-Run `npm run build` before `npm run test:e2e`, because the browser tests use the build in `public/`.
+Run `npm run build` before `npm run test:e2e`, because the browser tests use the build in `public/`. The first time, install the test browser with `npx playwright install chromium`. The browser tests answer the Mastodon API from a mock (`e2e/mock.ts`).
 
 ## Deployment
 
