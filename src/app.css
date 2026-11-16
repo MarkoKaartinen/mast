@@ -53,3 +53,31 @@ button {
   font: inherit;
   color: inherit;
 }
+
+/* One color per account, picked by accountColorClass(). Used as var(--account). */
+.acc-0 { --account: var(--ctp-blue); }
+.acc-1 { --account: var(--ctp-green); }
+.acc-2 { --account: var(--ctp-peach); }
+.acc-3 { --account: var(--ctp-pink); }
+.acc-4 { --account: var(--ctp-teal); }
+.acc-5 { --account: var(--ctp-yellow); }
+.acc-6 { --account: var(--ctp-sapphire); }
+.acc-7 { --account: var(--ctp-red); }
+
+:focus-visible {
+  outline: 2px solid var(--ctp-mauve);
+  outline-offset: 2px;
+}
+
+button {
+  cursor: pointer;
+}
+
+button:disabled {
+  cursor: default;
+}
+
+* {
+  scrollbar-width: thin;
+  scrollbar-color: var(--ctp-surface1) transparent;
+}

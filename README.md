@@ -11,7 +11,7 @@ The view has four columns (tabs on a narrow screen). Each one combines all conne
 * Direct messages, shown as conversations
 * Posts sent by your accounts
 
-Accounts can be on different servers. Each column shows how many items are unread and has a mark as read button. The read state is kept in the browser (local storage), because the Mastodon API has no per-notification read state for this use.
+Accounts can be on different servers and are managed behind the people icon in the top right corner. Every account has its own color, shown on the cards, so you see which account an item concerns. Each column shows how many items are unread and has a mark as read button. The read state is kept in the browser (local storage), because the Mastodon API has no per-notification read state for this use.
 
 The first version is read only. Dark theme only ([Catppuccin Mocha](https://catppuccin.com/palette/)). UI languages are Finnish and English.
 

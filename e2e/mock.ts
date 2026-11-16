@@ -11,6 +11,8 @@ const status = (id: string, html: string, account = me) => ({
   url: `${INSTANCE}/@ronsu/${id}`,
   content: html,
   spoiler_text: '',
+  sensitive: false,
+  media_attachments: [],
   visibility: 'public',
   account,
   reblog: null,
@@ -61,7 +63,14 @@ export async function mockMastodon(page: Page): Promise<void> {
       case '/api/v1/conversations':
         return json([{ id: '5', unread: true, accounts: [other], last_status: status('30', '<p>Secret hello</p>', other) }]);
       case `/api/v1/accounts/${me.id}/statuses`:
-        return json([status('40', '<p>My own post</p>')]);
+        return json([
+          {
+            ...status('40', '<p>My own post</p>'),
+            media_attachments: [{ id: 'm1', type: 'image', url: `${INSTANCE}/preview.svg`, preview_url: `${INSTANCE}/preview.svg`, description: 'A purple square' }],
+          },
+        ]);
+      case '/preview.svg':
+        return route.fulfill({ contentType: 'image/svg+xml', body: '<svg xmlns="http://www.w3.org/2000/svg" width="320" height="180"><rect width="320" height="180" fill="#cba6f7"/></svg>' });
       default:
         return route.fulfill({ status: 404, json: { error: 'not mocked' } });
     }

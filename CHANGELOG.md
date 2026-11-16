@@ -14,3 +14,6 @@
 * Show which columns failed and with what status when hovering the warning of an account
 * Add a load more button to each column for older items
 * Ask to log in again when the server no longer accepts a token
+* Redesign the layout: full height columns that scroll on their own, tabs at the bottom on a narrow screen and a compact mark as read icon
+* Move the accounts behind an icon in the top right corner and give each account its own color
+* Show on every card which account it concerns, the time as relative text and image attachments

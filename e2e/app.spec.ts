@@ -5,6 +5,10 @@ test.beforeEach(async ({ page }) => {
   await mockMastodon(page);
 });
 
+async function openAccounts(page: import('@playwright/test').Page) {
+  await page.getByRole('button', { name: /^accounts$|^tilit$/i }).click();
+}
+
 async function connect(page: import('@playwright/test').Page) {
   await page.goto('/');
   await page.getByLabel(/server|palvelin/i).fill('mastodon.example');
@@ -23,7 +27,10 @@ test('connects an account and shows the columns with unread counts', async ({ pa
   await expect(page).toHaveURL('http://localhost:4173/');
   // The unsafe link was stripped from the post
   await expect(page.locator('.content a[href^="javascript"]')).toHaveCount(0);
+  await expect(page.getByRole('img', { name: 'A purple square' })).toBeVisible();
   await page.screenshot({ path: 'test-results/desktop.png' });
+  await openAccounts(page);
+  await page.screenshot({ path: 'test-results/accounts.png' });
 });
 
 test('marks a column as read and remembers it after a reload', async ({ page }) => {
@@ -62,6 +69,7 @@ test('shows which account failed to load', async ({ page }) => {
   await connect(page);
 
   await expect(page.getByText('Secret hello')).toBeVisible();
+  await openAccounts(page);
   // The tooltip names the failing columns and the status
   await expect(page.getByTitle(/could not load this account.*Favourites and boosts: 500.*Mentions: 500/i)).toBeVisible();
 });
@@ -71,6 +79,7 @@ test('hides the server form once an account exists', async ({ page }) => {
   await connect(page);
 
   await expect(page.getByText('Liked post')).toBeVisible();
+  await openAccounts(page);
   await expect(page.getByLabel(/server|palvelin/i)).toHaveCount(0);
   await page.getByRole('button', { name: /add account|lisää tili/i }).click();
   await expect(page.getByLabel(/server|palvelin/i)).toBeVisible();
@@ -107,7 +116,9 @@ test('refreshes with the button and keeps old items when the server rate limits'
   });
   await page.getByRole('button', { name: /^refresh$|^päivitä$/i }).click();
 
+  await openAccounts(page);
   await expect(page.getByTitle(/Favourites and boosts: 429.*Too many requests/i)).toBeVisible();
+  await page.keyboard.press('Escape');
   // Nothing disappeared
   await expect(page.getByText('Liked post')).toBeVisible();
   await expect(page.getByText('Secret hello')).toBeVisible();
@@ -139,6 +150,8 @@ test('asks to log in again when the token is no longer accepted', async ({ page 
   await page.setViewportSize({ width: 1280, height: 800 });
   await page.route('https://mastodon.example/api/v1/notifications**', (route) => route.fulfill({ status: 401, json: { error: 'The access token is invalid' } }));
   await connect(page);
+  await expect(page.getByText('Secret hello')).toBeVisible();
 
+  await openAccounts(page);
   await expect(page.getByRole('button', { name: /log in again|kirjaudu uudelleen/i })).toBeVisible();
 });
