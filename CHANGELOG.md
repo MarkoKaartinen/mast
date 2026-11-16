@@ -17,3 +17,4 @@
 * Redesign the layout: full height columns that scroll on their own, tabs at the bottom on a narrow screen and a compact mark as read icon
 * Move the accounts behind an icon in the top right corner and give each account its own color
 * Show on every card which account it concerns, the time as relative text and image attachments
+* Show the account at the top of each card and dim the colored edge of read cards

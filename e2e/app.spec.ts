@@ -42,6 +42,7 @@ test('marks a column as read and remembers it after a reload', async ({ page }) 
   await expect(interactions.locator('.badge')).toHaveText('2');
   await interactions.getByRole('button', { name: /mark as read|merkitse luetuksi/i }).click();
   await expect(interactions.locator('.badge')).toHaveCount(0);
+  await page.screenshot({ path: 'test-results/read.png' });
   // Other columns keep their own unread state
   await expect(page.locator('section.column').nth(1).locator('.badge')).toHaveText('1');
 

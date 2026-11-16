@@ -48,6 +48,20 @@
 {/snippet}
 
 <article class="card {accountColorClass(item.accountKey)}" class:unread>
+  <div class="top">
+    {#if owner}
+      <span class="account" title={owner.acct}>
+        {#if ownerAvatar}<img src={ownerAvatar} alt="" width="14" height="14" />{/if}
+        <span>{owner.acct}</span>
+      </span>
+    {/if}
+    {#if link}
+      <a href={link} target="_blank" rel="noopener noreferrer" title={fullTime}><time datetime={item.createdAt}>{time}</time></a>
+    {:else}
+      <time datetime={item.createdAt} title={fullTime}>{time}</time>
+    {/if}
+  </div>
+
   <header>
     {#if avatar}<img class="avatar" src={avatar} alt="" width="36" height="36" loading="lazy" />{/if}
     <div class="who">
@@ -72,19 +86,6 @@
     {/if}
   {/if}
 
-  <footer>
-    {#if owner}
-      <span class="account" title={owner.acct}>
-        {#if ownerAvatar}<img src={ownerAvatar} alt="" width="14" height="14" />{/if}
-        <span>{owner.acct}</span>
-      </span>
-    {/if}
-    {#if link}
-      <a href={link} target="_blank" rel="noopener noreferrer" title={fullTime}><time datetime={item.createdAt}>{time}</time></a>
-    {:else}
-      <time datetime={item.createdAt} title={fullTime}>{time}</time>
-    {/if}
-  </footer>
 </article>
 
 <style>
@@ -93,8 +94,8 @@
     margin-bottom: 0.6rem;
     background: var(--ctp-mantle);
     border: 1px solid var(--ctp-surface0);
-    /* The account's color on the left edge shows which account the item belongs to */
-    border-left: 3px solid var(--account);
+    /* The account's color on the left edge shows which account the item belongs to, dimmed once read */
+    border-left: 3px solid color-mix(in srgb, var(--account) 45%, transparent);
     border-radius: 0.5rem;
     overflow-wrap: anywhere;
     color: var(--ctp-subtext1);
@@ -208,12 +209,12 @@
     border-color: transparent transparent transparent var(--ctp-text);
     filter: drop-shadow(0 0 4px rgb(0 0 0 / 0.7));
   }
-  footer {
+  .top {
     display: flex;
     align-items: center;
     justify-content: space-between;
     gap: 0.5rem;
-    margin-top: 0.5rem;
+    margin-bottom: 0.5rem;
     font-size: 0.75rem;
     color: var(--ctp-subtext0);
   }
@@ -236,7 +237,7 @@
   .account img {
     border-radius: 50%;
   }
-  footer a {
+  .top a {
     color: inherit;
   }
 </style>
