@@ -25,5 +25,6 @@ export const fi: Record<keyof typeof en, string> = {
   markRead: 'Merkitse luetuksi',
   unread: 'lukematonta',
   loading: 'Ladataan',
+  loadFailed: 'Tilin tietojen haku epäonnistui',
   errorLoginFailed: 'Kirjautuminen epäonnistui. Yritä uudelleen.',
 };

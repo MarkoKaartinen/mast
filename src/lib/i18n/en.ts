@@ -23,5 +23,6 @@ export const en = {
   markRead: 'Mark as read',
   unread: 'unread',
   loading: 'Loading',
+  loadFailed: 'Could not load this account',
   errorLoginFailed: 'Login failed. Try again.',
 } as const;

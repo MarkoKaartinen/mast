@@ -54,3 +54,23 @@ test('uses tabs on a narrow screen', async ({ page }) => {
   await expect(page.getByText('Secret hello')).toBeVisible();
   await page.screenshot({ path: 'test-results/mobile.png' });
 });
+
+test('shows which account failed to load', async ({ page }) => {
+  await page.setViewportSize({ width: 1280, height: 800 });
+  // Registered after the mock, so it answers first
+  await page.route('https://mastodon.example/api/v1/notifications**', (route) => route.fulfill({ status: 500, json: {} }));
+  await connect(page);
+
+  await expect(page.getByText('Secret hello')).toBeVisible();
+  await expect(page.getByTitle(/could not load this account|tilin tietojen haku epäonnistui/i)).toBeVisible();
+});
+
+test('hides the server form once an account exists', async ({ page }) => {
+  await page.setViewportSize({ width: 1280, height: 800 });
+  await connect(page);
+
+  await expect(page.getByText('Liked post')).toBeVisible();
+  await expect(page.getByLabel(/server|palvelin/i)).toHaveCount(0);
+  await page.getByRole('button', { name: /add account|lisää tili/i }).click();
+  await expect(page.getByLabel(/server|palvelin/i)).toBeVisible();
+});

@@ -8,3 +8,4 @@
 * Highlight unread items, show unread counts and add a mark as read button per column
 * Refresh the columns every minute while the page is visible
 * Add browser tests with a mocked Mastodon server
+* Show the server form only when adding an account and mark accounts that fail to load
