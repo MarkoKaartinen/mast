@@ -2,6 +2,12 @@
 
 MAST is a dashboard-style web app for following several Mastodon accounts at once. It runs in the browser and installs as a PWA. There is no backend: the app talks directly to your Mastodon servers using the official [Mastodon client API](https://docs.joinmastodon.org/client/intro/).
 
+![Four columns with two accounts on a wide screen](docs/screenshot-desktop.png)
+
+<img src="docs/screenshot-phone.png" alt="The same view on a phone, with tabs at the bottom" width="320">
+
+The screenshots are made from mock data, not from real accounts.
+
 ## Features
 
 The view has four columns (tabs on a narrow screen). Each one combines all connected accounts in time order:
@@ -40,7 +46,7 @@ Svelte 5, Vite and TypeScript. The build is a static site in `public/`. PWA supp
     npm run build
     npm run test:e2e
 
-Run `npm run build` before `npm run test:e2e`, because the browser tests use the build in `public/`. The first time, install the test browser with `npx playwright install chromium`. The browser tests answer the Mastodon API from a mock (`e2e/mock.ts`).
+Run `npm run build` before `npm run test:e2e`, because the browser tests use the build in `public/`. The first time, install the test browser with `npx playwright install chromium`. The browser tests answer the Mastodon API from a mock (`e2e/mock.ts`), also on a phone profile. To update the screenshots above: `SCREENSHOTS=1 npx playwright test screenshots --project desktop`.
 
 ## Deployment
 
