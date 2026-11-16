@@ -1,6 +1,7 @@
 ### Unreleased
 
 * Show a welcome page with the server field when no account is connected
+* Show only the account name in the account chip of a card, with the server when two accounts share the name
 * Give each account its own color by its place in the list, with colors far apart, instead of a hash that often repeated one
 
 ### 0.1.0: 2026-11-16

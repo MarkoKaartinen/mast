@@ -12,3 +12,10 @@ export function accountColorClass(accountKey: string, accountKeys: string[]): st
   for (const char of accountKey) hash = (hash * 31 + char.charCodeAt(0)) >>> 0;
   return `acc-${hash % ACCOUNT_COLORS}`;
 }
+
+/** The short name for the account chip: the part before the server. Kept in full when another account has the same one. */
+export function accountLabel(acct: string, allAccts: string[]): string {
+  const name = acct.split('@')[0];
+  const shared = allAccts.filter((other) => other.split('@')[0] === name).length > 1;
+  return shared ? acct : name;
+}
