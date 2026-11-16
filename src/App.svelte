@@ -3,17 +3,11 @@
   import { accountStore, initAccounts } from '$lib/accounts.svelte';
   import Accounts from '$lib/components/Accounts.svelte';
   import Column from '$lib/components/Column.svelte';
-  import { COLUMNS, refreshAll, startPolling, unreadCount } from '$lib/feeds.svelte';
-  import { t, type Key } from '$lib/i18n';
+  import { COLUMNS, COLUMN_TITLES, refreshAll, startPolling, unreadCount } from '$lib/feeds.svelte';
+  import { t } from '$lib/i18n';
   import { connectStream } from '$lib/streaming';
   import type { ColumnId } from '$lib/unread';
 
-  const titles: Record<ColumnId, Key> = {
-    interactions: 'columnInteractions',
-    mentions: 'columnMentions',
-    messages: 'columnMessages',
-    posts: 'columnPosts',
-  };
   let active = $state<ColumnId>('interactions');
 
   onMount(() => {
@@ -47,7 +41,7 @@
 <nav class="tabs" aria-label={t('appName')}>
   {#each COLUMNS as id (id)}
     <button class:active={id === active} onclick={() => (active = id)}>
-      {t(titles[id])}
+      {t(COLUMN_TITLES[id])}
       {#if unreadCount(id) > 0}<span class="dot" aria-hidden="true"></span>{/if}
     </button>
   {/each}
@@ -56,7 +50,7 @@
 <main class="columns">
   {#each COLUMNS as id (id)}
     <section class="column" class:active={id === active}>
-      <Column column={id} title={titles[id]} hasAccounts={accountStore.list.length > 0} />
+      <Column column={id} title={COLUMN_TITLES[id]} hasAccounts={accountStore.list.length > 0} />
     </section>
   {/each}
 </main>

@@ -1,10 +1,19 @@
 import { accountStore } from '$lib/accounts.svelte';
+import { ApiError } from '$lib/api/client';
 import { fetchConversations, fetchInteractions, fetchMentions, fetchPosts } from '$lib/api/feeds';
+import type { Key } from '$lib/i18n';
 import { fromConversations, fromNotifications, fromPosts, mergeFeeds, type FeedItem } from '$lib/feed';
 import type { StoredAccount } from '$lib/storage';
 import { isUnread, loadSeen, newestId, saveSeen, type ColumnId } from '$lib/unread';
 
 export const COLUMNS: ColumnId[] = ['interactions', 'mentions', 'messages', 'posts'];
+
+export const COLUMN_TITLES: Record<ColumnId, Key> = {
+  interactions: 'columnInteractions',
+  mentions: 'columnMentions',
+  messages: 'columnMessages',
+  posts: 'columnPosts',
+};
 
 /** How often to poll while the page is visible. The streaming API replaces this later. */
 export const POLL_INTERVAL_MS = 60_000;
@@ -20,8 +29,8 @@ export const feedStore = $state({
   items: { interactions: [], mentions: [], messages: [], posts: [] } as Record<ColumnId, FeedItem[]>,
   /** Last item marked as read, keyed "<column>/<account key>" */
   seen: {} as Record<string, string | undefined>,
-  /** Account keys whose last refresh failed */
-  failed: [] as string[],
+  /** What failed in the last refresh, keyed by account: the column and the HTTP status ("network" if none) */
+  failed: {} as Record<string, { column: ColumnId; status: string }[]>,
   /** False until the first refresh has finished, so "loading" is only shown once */
   loaded: false,
   loading: false,
@@ -69,7 +78,7 @@ export async function refreshAll(): Promise<void> {
   }
   feedStore.loading = true;
   loadSeenMarks(accounts);
-  const failed = new Set<string>();
+  const failed: typeof feedStore.failed = {};
   const next = {} as Record<ColumnId, FeedItem[]>;
   await Promise.all(
     COLUMNS.map(async (column) => {
@@ -77,14 +86,15 @@ export async function refreshAll(): Promise<void> {
       next[column] = mergeFeeds(
         results.flatMap((r, i) => {
           if (r.status === 'fulfilled') return [r.value];
-          failed.add(accounts[i].key);
+          const status = r.reason instanceof ApiError ? String(r.reason.status) : 'network';
+          (failed[accounts[i].key] ??= []).push({ column, status });
           return [];
         }),
       );
     }),
   );
   for (const column of COLUMNS) feedStore.items[column] = next[column];
-  feedStore.failed = [...failed];
+  feedStore.failed = failed;
   feedStore.loading = false;
   feedStore.loaded = true;
   if (refreshAgain) {

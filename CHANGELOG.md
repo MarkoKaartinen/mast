@@ -10,3 +10,4 @@
 * Add browser tests with a mocked Mastodon server
 * Show the server form only when adding an account and mark accounts that fail to load
 * Fix empty columns staying in the loading state and feeds being reloaded in a loop
+* Show which columns failed and with what status when hovering the warning of an account

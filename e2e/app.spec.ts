@@ -62,7 +62,8 @@ test('shows which account failed to load', async ({ page }) => {
   await connect(page);
 
   await expect(page.getByText('Secret hello')).toBeVisible();
-  await expect(page.getByTitle(/could not load this account|tilin tietojen haku epäonnistui/i)).toBeVisible();
+  // The tooltip names the failing columns and the status
+  await expect(page.getByTitle(/could not load this account.*Favourites and boosts: 500.*Mentions: 500/i)).toBeVisible();
 });
 
 test('hides the server form once an account exists', async ({ page }) => {
