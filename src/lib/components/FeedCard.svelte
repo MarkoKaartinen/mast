@@ -47,7 +47,7 @@
   {/if}
 {/snippet}
 
-<article class="card {accountColorClass(item.accountKey)}" class:unread>
+<article class="card {accountColorClass(item.accountKey, accountStore.list.map((a) => a.key))}" class:unread>
   <div class="top">
     {#if owner}
       <span class="account" title={owner.acct}>

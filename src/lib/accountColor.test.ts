@@ -2,8 +2,13 @@ import { describe, expect, it } from 'vitest';
 import { accountColorClass } from './accountColor';
 
 describe('accountColorClass', () => {
-  it('is stable and stays within the defined colors', () => {
-    expect(accountColorClass('https://mastodon.example/1')).toBe(accountColorClass('https://mastodon.example/1'));
-    for (const key of ['a', 'b', 'https://mastodon.example/123', '']) expect(accountColorClass(key)).toMatch(/^acc-[0-7]$/);
+  it('gives every account of the list its own color', () => {
+    const keys = Array.from({ length: 8 }, (_, i) => `https://mastodon.example/${i}`);
+    expect(new Set(keys.map((key) => accountColorClass(key, keys))).size).toBe(8);
+  });
+
+  it('is stable and stays within the defined colors, also for unknown keys', () => {
+    expect(accountColorClass('x', [])).toBe(accountColorClass('x', []));
+    for (const key of ['a', 'b', '']) expect(accountColorClass(key, [])).toMatch(/^acc-[0-7]$/);
   });
 });
