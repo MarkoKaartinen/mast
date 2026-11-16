@@ -1,5 +1,15 @@
 import type { Account } from './client';
 
+/** The fields of Mastodon's MediaAttachment entity this app uses. */
+export interface MediaAttachment {
+  id: string;
+  type: 'unknown' | 'image' | 'gifv' | 'video' | 'audio';
+  url: string | null;
+  /** A still image, also for videos and gifs. Can be null for audio and unknown types. */
+  preview_url: string | null;
+  description: string | null;
+}
+
 /** The fields of Mastodon's Status entity this app uses. */
 export interface Status {
   id: string;
@@ -8,6 +18,8 @@ export interface Status {
   /** HTML from the server: only ever render it through the sanitizer in html.ts */
   content: string;
   spoiler_text: string;
+  sensitive: boolean;
+  media_attachments: MediaAttachment[];
   visibility: 'public' | 'unlisted' | 'private' | 'direct';
   account: Account;
   reblog: Status | null;

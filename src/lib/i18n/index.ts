@@ -11,7 +11,7 @@ export function detectLanguage(languages: readonly string[]): 'en' | 'fi' {
   return first?.toLowerCase().startsWith('fi') ? 'fi' : 'en';
 }
 
-const lang = detectLanguage(typeof navigator === 'undefined' ? [] : navigator.languages);
+export const lang = detectLanguage(typeof navigator === 'undefined' ? [] : navigator.languages);
 
 export function t(key: Key): string {
   return dictionaries[lang][key];

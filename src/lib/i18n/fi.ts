@@ -30,5 +30,9 @@ export const fi: Record<keyof typeof en, string> = {
   rateLimitedHint: 'Liikaa pyyntöjä, odotetaan ennen uutta yritystä',
   loadMore: 'Lataa lisää',
   loginExpiredHint: 'Palvelin ei enää hyväksy tätä kirjautumista',
+  sensitiveMedia: 'Arkaluonteinen media',
+  confirmRemove: 'Poistetaanko tämä tili sovelluksesta?',
+  emptyHint: 'Uudet kohteet näkyvät tässä',
+  media: 'Liitteet',
   errorLoginFailed: 'Kirjautuminen epäonnistui. Yritä uudelleen.',
 };

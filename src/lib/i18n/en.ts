@@ -28,5 +28,9 @@ export const en = {
   rateLimitedHint: 'Too many requests, waiting before trying again',
   loadMore: 'Load more',
   loginExpiredHint: 'The server no longer accepts this login',
+  sensitiveMedia: 'Sensitive media',
+  confirmRemove: 'Remove this account from the app?',
+  emptyHint: 'New items show up here',
+  media: 'Attachments',
   errorLoginFailed: 'Login failed. Try again.',
 } as const;

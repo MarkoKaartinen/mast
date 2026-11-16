@@ -9,6 +9,8 @@ const status = (id: string, created_at: string): Status => ({
   url: null,
   content: '<p>Hi</p>',
   spoiler_text: '',
+  sensitive: false,
+  media_attachments: [],
   visibility: 'public',
   account: person,
   reblog: null,
