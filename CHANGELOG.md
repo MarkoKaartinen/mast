@@ -1,31 +1,10 @@
-### Unreleased
+### 0.1.0: 2026-11-16
 
-* Add README, AGENTS.md and project documentation
-* Add the app shell: Vite, Svelte, PWA manifest and service worker, Catppuccin Mocha theme, Finnish and English UI
-* Add OAuth login with PKCE and the state check, stored in the browser
-* Add accounts panel to connect and remove accounts on any server
-* Show favourites and boosts, mentions, direct messages and sent posts of all accounts in four columns
-* Highlight unread items, show unread counts and add a mark as read button per column
-* Refresh the columns every 5 minutes while the page is visible and with a refresh button
-* Keep the old items when a refresh fails and pause an account for a while after a rate limit response
-* Add browser tests with a mocked Mastodon server
-* Show the server form only when adding an account and mark accounts that fail to load
-* Fix empty columns staying in the loading state and feeds being reloaded in a loop
-* Show which columns failed and with what status when hovering the warning of an account
-* Add a load more button to each column for older items
-* Ask to log in again when the server no longer accepts a token
-* Redesign the layout: full height columns that scroll on their own, tabs at the bottom on a narrow screen and a compact mark as read icon
-* Move the accounts behind an icon in the top right corner and give each account its own color
-* Show on every card which account it concerns, the time as relative text and image attachments
-* Show the account at the top of each card and dim the colored edge of read cards
-* Show the read state of a card with an icon and the edge color instead of a different background
-* Show the app version in the accounts menu
-* Add the bell logo as the app icon, favicon and app bar logo
-* Add the MIT license
-* Show custom emojis in names, posts and content warnings
-* Improve the phone experience: 44 px touch targets, visible height that follows the browser bar and iOS home screen settings
-* Add screenshots to the README, made from mock data with two accounts
-* Count only items that arrive after an account was added as unread
-* Show the number of unread items in the page title and on the icon of the installed app
-* Save the last loaded items so that they show at once and when a server cannot be reached
-* Remove the saved items and read marks of an account when it is removed
+* First release of Mastodon Tools (MAST): a PWA for following several Mastodon accounts, in Finnish and English with the Catppuccin Mocha theme
+* Log in to accounts on any server with OAuth and PKCE, tokens stay in the browser
+* Show favourites and boosts, mentions, direct messages and sent posts of all accounts in four columns, with tabs on a narrow screen
+* Show on every card which account it concerns with a color per account, the time as relative text, image attachments and custom emojis
+* Count only items that arrive after an account was added as unread, with a read state icon, an unread count and a mark as read button per column, and the total in the page title and on the app icon
+* Refresh every 5 minutes while the page is visible and with a refresh button, and load older items with load more
+* Save the last loaded items to show them at once and offline, pause an account after a rate limit response and ask to log in again when a token is rejected
+* Add the bell logo, app icons, MIT license, README with screenshots and browser tests with a mocked Mastodon server
