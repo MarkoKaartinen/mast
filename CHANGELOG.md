@@ -6,6 +6,6 @@
 * Add accounts panel to connect and remove accounts on any server
 * Show favourites and boosts, mentions, direct messages and sent posts of all accounts in four columns
 * Highlight unread items, show unread counts and add a mark as read button per column
-* Refresh the columns every minute while the page is visible
+* Refresh the columns every minute while the page is visible and right away on streaming events
 * Add browser tests with a mocked Mastodon server
 * Show the server form only when adding an account and mark accounts that fail to load

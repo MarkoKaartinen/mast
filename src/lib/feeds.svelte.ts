@@ -52,10 +52,17 @@ export function markRead(column: ColumnId): void {
   }
 }
 
+/** Set when a refresh was requested while one was running, so that the change is not missed. */
+let refreshAgain = false;
+
 export async function refreshAll(): Promise<void> {
   const accounts = accountStore.list;
-  if (feedStore.loading || accounts.length === 0) {
-    if (accounts.length === 0) for (const c of COLUMNS) feedStore.items[c] = [];
+  if (accounts.length === 0) {
+    for (const c of COLUMNS) feedStore.items[c] = [];
+    return;
+  }
+  if (feedStore.loading) {
+    refreshAgain = true;
     return;
   }
   feedStore.loading = true;
@@ -77,6 +84,10 @@ export async function refreshAll(): Promise<void> {
   for (const column of COLUMNS) feedStore.items[column] = next[column];
   feedStore.failed = [...failed];
   feedStore.loading = false;
+  if (refreshAgain) {
+    refreshAgain = false;
+    await refreshAll();
+  }
 }
 
 /** Starts polling and refreshes when the tab becomes visible again. Returns a function that stops it. */

@@ -19,7 +19,7 @@ The first version is read only. Dark theme only ([Catppuccin Mocha](https://catp
 
 * Login uses OAuth 2 authorization code flow with PKCE. The app registers itself on each server with `POST /api/v1/apps`, so any server works. Mastodon only provisions confidential clients, so the client secret it returns is stored in the browser together with the access token. PKCE needs Mastodon 4.3 or newer.
 * Notifications: `GET /api/v1/notifications` filtered by type. Direct messages: `GET /api/v1/conversations`. Own posts: `GET /api/v1/accounts/:id/statuses`.
-* New items arrive through the streaming API, with polling as a fallback.
+* The streaming API (WebSocket, `user` stream, found through `GET /api/v2/instance`) tells the app when something new happens and the columns are then reloaded. Polling every minute is the fallback.
 * Tokens and cached data stay in the browser. Nothing is sent to any server other than your own Mastodon servers.
 * Web Push is not supported, because it needs a server component. Notifications are shown while the app is open.
 

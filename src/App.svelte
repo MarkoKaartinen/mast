@@ -5,6 +5,7 @@
   import Column from '$lib/components/Column.svelte';
   import { COLUMNS, refreshAll, startPolling, unreadCount } from '$lib/feeds.svelte';
   import { t, type Key } from '$lib/i18n';
+  import { connectStream } from '$lib/streaming';
   import type { ColumnId } from '$lib/unread';
 
   const titles: Record<ColumnId, Key> = {
@@ -24,6 +25,12 @@
   $effect(() => {
     void accountStore.list.length;
     if (accountStore.ready) void refreshAll();
+  });
+
+  // One live stream per account: it only tells when to refresh, the columns are always loaded from the REST API
+  $effect(() => {
+    const stops = accountStore.list.map((account) => connectStream(account, () => void refreshAll()));
+    return () => stops.forEach((stop) => stop());
   });
 </script>
 
