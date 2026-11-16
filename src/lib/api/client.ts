@@ -22,12 +22,20 @@ export class ApiError extends Error {
   }
 }
 
+/** Mastodon's CustomEmoji entity: ":shortcode:" in a name or post is shown as the image at url. */
+export interface CustomEmoji {
+  shortcode: string;
+  url: string;
+  static_url: string;
+}
+
 /** The fields of Mastodon's Account entity this app uses. */
 export interface Account {
   id: string;
   acct: string;
   display_name: string;
   avatar: string;
+  emojis: CustomEmoji[];
 }
 
 export interface Page<T> {

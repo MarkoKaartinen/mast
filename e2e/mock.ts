@@ -2,8 +2,13 @@ import type { Page, Route } from '@playwright/test';
 
 export const INSTANCE = 'https://mastodon.example';
 
-const me = { id: '1', acct: 'ronsu', display_name: 'Ronsu', avatar: `${INSTANCE}/avatar.png` };
-const other = { id: '2', acct: 'friend@other.example', display_name: 'A Friend', avatar: `${INSTANCE}/friend.png` };
+const blob = { shortcode: 'blobaww', url: `${INSTANCE}/emoji.svg`, static_url: `${INSTANCE}/emoji.svg` };
+const me = { id: '1', acct: 'ronsu', display_name: 'Ronsu', avatar: `${INSTANCE}/avatar.svg`, emojis: [] as (typeof blob)[] };
+const other = { id: '2', acct: 'friend@other.example', display_name: 'A Friend :blobaww:', avatar: `${INSTANCE}/friend.svg`, emojis: [blob] };
+
+/** A round colored avatar with an initial, so screenshots do not show broken images */
+const avatar = (color: string, initial: string) =>
+  `<svg xmlns="http://www.w3.org/2000/svg" width="96" height="96"><rect width="96" height="96" fill="${color}"/><text x="48" y="64" font-size="48" text-anchor="middle" font-family="sans-serif" fill="#1e1e2e">${initial}</text></svg>`;
 
 const status = (id: string, html: string, account = me) => ({
   id,
@@ -13,6 +18,7 @@ const status = (id: string, html: string, account = me) => ({
   spoiler_text: '',
   sensitive: false,
   media_attachments: [],
+  emojis: [blob],
   visibility: 'public',
   account,
   reblog: null,
@@ -57,7 +63,7 @@ export async function mockMastodon(page: Page): Promise<void> {
         return route.fulfill({
           // Like Mastodon, expose the Link header to the browser
           headers: { link: next, 'access-control-expose-headers': 'Link' },
-          json: [notification('12', 'favourite', '<p>Liked post</p>'), notification('11', 'reblog', '<p>Boosted post</p>')],
+          json: [notification('12', 'favourite', '<p>Liked post :blobaww:</p>'), notification('11', 'reblog', '<p>Boosted post</p>')],
         });
       }
       case '/api/v1/conversations':
@@ -69,6 +75,12 @@ export async function mockMastodon(page: Page): Promise<void> {
             media_attachments: [{ id: 'm1', type: 'image', url: `${INSTANCE}/preview.svg`, preview_url: `${INSTANCE}/preview.svg`, description: 'A purple square' }],
           },
         ]);
+      case '/avatar.svg':
+        return route.fulfill({ contentType: 'image/svg+xml', body: avatar('#89b4fa', 'R') });
+      case '/friend.svg':
+        return route.fulfill({ contentType: 'image/svg+xml', body: avatar('#f5c2e7', 'F') });
+      case '/emoji.svg':
+        return route.fulfill({ contentType: 'image/svg+xml', body: '<svg xmlns="http://www.w3.org/2000/svg" width="32" height="32"><circle cx="16" cy="16" r="15" fill="#f9e2af"/><circle cx="11" cy="13" r="2" fill="#1e1e2e"/><circle cx="21" cy="13" r="2" fill="#1e1e2e"/><path d="M9 19q7 7 14 0" stroke="#1e1e2e" stroke-width="2" fill="none"/></svg>' });
       case '/preview.svg':
         return route.fulfill({ contentType: 'image/svg+xml', body: '<svg xmlns="http://www.w3.org/2000/svg" width="320" height="180"><rect width="320" height="180" fill="#cba6f7"/></svg>' });
       default:

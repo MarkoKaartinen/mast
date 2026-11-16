@@ -1,4 +1,4 @@
-import type { Account } from './client';
+import type { Account, CustomEmoji } from './client';
 
 /** The fields of Mastodon's MediaAttachment entity this app uses. */
 export interface MediaAttachment {
@@ -20,6 +20,7 @@ export interface Status {
   spoiler_text: string;
   sensitive: boolean;
   media_attachments: MediaAttachment[];
+  emojis: CustomEmoji[];
   visibility: 'public' | 'unlisted' | 'private' | 'direct';
   account: Account;
   reblog: Status | null;

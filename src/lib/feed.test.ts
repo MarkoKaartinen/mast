@@ -2,7 +2,7 @@ import { describe, expect, it } from 'vitest';
 import type { Notification, Status } from '$lib/api/types';
 import { fromNotifications, fromPosts, mergeFeeds, mergeRefresh, type FeedItem } from './feed';
 
-const person = { id: '1', acct: 'ronsu@mastodon.example', display_name: '', avatar: 'https://mastodon.example/a.png' };
+const person = { id: '1', acct: 'ronsu@mastodon.example', display_name: '', avatar: 'https://mastodon.example/a.png', emojis: [] };
 const status = (id: string, created_at: string): Status => ({
   id,
   created_at,
@@ -11,6 +11,7 @@ const status = (id: string, created_at: string): Status => ({
   spoiler_text: '',
   sensitive: false,
   media_attachments: [],
+  emojis: [],
   visibility: 'public',
   account: person,
   reblog: null,
@@ -40,7 +41,7 @@ describe('feed', () => {
   });
 
   describe('mergeRefresh', () => {
-    const item = (id: string): FeedItem => ({ key: 'k' + id, accountKey: 'a', id, createdAt: '', kind: 'post', from: { acct: '', displayName: '', avatar: '' }, status: null });
+    const item = (id: string): FeedItem => ({ key: 'k' + id, accountKey: 'a', id, createdAt: '', kind: 'post', from: { acct: '', displayName: '', avatar: '', emojis: [] }, status: null });
 
     it('keeps older loaded items and their link after a refresh', () => {
       const existing = { items: [item('50'), item('40'), item('30'), item('20')], next: 'older-link' };

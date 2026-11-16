@@ -4,7 +4,7 @@
   import { accountStore } from '$lib/accounts.svelte';
   import { COLUMN_ICONS } from '$lib/columnIcons';
   import type { FeedItem } from '$lib/feed';
-  import { sanitizeHtml } from '$lib/html';
+  import { emojify, sanitizeHtml } from '$lib/html';
   import { lang, t, type Key } from '$lib/i18n';
   import { formatTime } from '$lib/time';
   import type { ColumnId } from '$lib/unread';
@@ -73,7 +73,7 @@
   <header>
     {#if avatar}<img class="avatar" src={avatar} alt="" width="36" height="36" loading="lazy" />{/if}
     <div class="who">
-      <strong>{item.from.displayName}</strong>
+      <strong>{@html emojify(item.from.displayName, item.from.emojis)}</strong>
       <small>{item.from.acct}</small>
     </div>
   </header>
@@ -83,12 +83,12 @@
   {#if shown}
     {#if shown.spoiler_text || (shown.sensitive && media.length)}
       <details>
-        <summary>{shown.spoiler_text || t('sensitiveMedia')}</summary>
-        {#if shown.content}<div class="content">{@html sanitizeHtml(shown.content)}</div>{/if}
+        <summary>{@html shown.spoiler_text ? emojify(shown.spoiler_text, shown.emojis) : t('sensitiveMedia')}</summary>
+        {#if shown.content}<div class="content">{@html sanitizeHtml(shown.content, shown.emojis)}</div>{/if}
         {@render attachments()}
       </details>
     {:else}
-      {#if shown.content}<div class="content">{@html sanitizeHtml(shown.content)}</div>{/if}
+      {#if shown.content}<div class="content">{@html sanitizeHtml(shown.content, shown.emojis)}</div>{/if}
       {@render attachments()}
     {/if}
   {/if}
@@ -162,6 +162,12 @@
   }
   .content {
     margin-top: 0.35rem;
+  }
+  /* Custom emojis are images that scale with the text */
+  :global(.emoji) {
+    height: 1.3em;
+    width: auto;
+    vertical-align: -0.3em;
   }
   .content :global(p) {
     margin: 0 0 0.5rem;

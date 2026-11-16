@@ -28,6 +28,10 @@ test('connects an account and shows the columns with unread counts', async ({ pa
   // The unsafe link was stripped from the post
   await expect(page.locator('.content a[href^="javascript"]')).toHaveCount(0);
   await expect(page.getByRole('img', { name: 'A purple square' })).toBeVisible();
+  // Custom emojis are shown as images in names and in posts, never as :shortcode: text
+  await expect(page.locator('.card strong img.emoji').first()).toBeVisible();
+  await expect(page.locator('.content img.emoji').first()).toBeVisible();
+  await expect(page.getByText(':blobaww:')).toHaveCount(0);
   await page.screenshot({ path: 'test-results/desktop.png' });
   await openAccounts(page);
   await page.screenshot({ path: 'test-results/accounts.png' });

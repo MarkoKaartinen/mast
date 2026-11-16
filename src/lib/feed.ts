@@ -1,4 +1,5 @@
 import { compareIds } from '$lib/unread';
+import type { CustomEmoji } from '$lib/api/client';
 import type { Conversation, Notification, Status } from '$lib/api/types';
 
 /** One row in a column, the same shape for every column. */
@@ -11,12 +12,12 @@ export interface FeedItem {
   createdAt: string;
   kind: 'favourite' | 'reblog' | 'mention' | 'message' | 'post';
   /** Who did it: the other person for notifications and messages, the account itself for posts */
-  from: { acct: string; displayName: string; avatar: string };
+  from: { acct: string; displayName: string; avatar: string; emojis: CustomEmoji[] };
   status: Status | null;
 }
 
-function from(account: { acct: string; display_name: string; avatar: string }) {
-  return { acct: account.acct, displayName: account.display_name || account.acct, avatar: account.avatar };
+function from(account: { acct: string; display_name: string; avatar: string; emojis: CustomEmoji[] }) {
+  return { acct: account.acct, displayName: account.display_name || account.acct, avatar: account.avatar, emojis: account.emojis };
 }
 
 export function fromNotifications(accountKey: string, list: Notification[]): FeedItem[] {

@@ -22,3 +22,4 @@
 * Show the app version in the accounts menu
 * Add the bell logo as the app icon, favicon and app bar logo
 * Add the MIT license
+* Show custom emojis in names, posts and content warnings
